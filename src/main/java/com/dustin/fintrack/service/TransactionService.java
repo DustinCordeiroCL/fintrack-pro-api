@@ -1,5 +1,6 @@
 package com.dustin.fintrack.service;
 
+import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
 import com.dustin.fintrack.model.Transaction;
 import com.dustin.fintrack.repository.TransactionRepository;
 import com.dustin.fintrack.repository.CategoryRepository;
@@ -29,7 +30,7 @@ public class TransactionService {
 
         // Business Rule: Verify if the category exists in the database
         categoryRepository.findById(transaction.getCategory().getId())
-                .orElseThrow(() -> new RuntimeException("Category not found."));
+                .orElseThrow(() -> new ResourceNotFoundException(transaction.getCategory().getId())); // Mude para a sua nova Exception
 
         return transactionRepository.save(transaction);
     }
