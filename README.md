@@ -1,6 +1,6 @@
 # FinTrack Pro API 🚀
 
-**FinTrack Pro** is a professional Financial Management API built with **Java 21** and **Spring Boot 3**. This project follows clean architecture principles and production-ready configurations to ensure scalability and maintainability.
+**FinTrack Pro** is a robust Financial Management API built with **Java 21** and **Spring Boot 3**. This project serves as the backbone for a personal finance ecosystem, featuring a clean architecture and production-ready configurations.
 
 ## 🛠 Tech Stack
 
@@ -8,48 +8,49 @@
 * **Framework:** Spring Boot 3.4.2
 * **Persistence:** Spring Data JPA / Hibernate
 * **Database:** PostgreSQL 16 (Development via Docker)
-* **API Versioning:** URI-based (v1)
-* **Utilities:** Lombok, Jakarta Validation, Jackson (JSON)
+* **Documentation:** SpringDoc OpenAPI (Swagger UI)
+* **Utilities:** Lombok, Jakarta Validation
 
-## 🏗 Architecture & Patterns
+## 🏗 Architecture
 
-The project follows a layered architecture to ensure separation of concerns:
-* **Models (Entities):** JPA Entities representing the database schema.
-* **DTOs (Data Transfer Objects):** Decoupling the persistence layer from the web layer for security and flexibility (v1).
+The project follows the **Controller-Service-Repository** pattern to ensure separation of concerns:
+* **Models:** JPA Entities representing the database schema.
 * **Repositories:** Abstraction layer for database operations.
-* **Services:** Centralized business logic, transaction management, and validations.
-* **Controllers:** Versioned REST endpoints (v1) for external communication.
-* **Global Exception Handling:** Centralized error management returning standardized JSON responses.
+* **Services:** Centralized business logic and validations.
+* **Controllers:** REST endpoints for external communication.
 
 ## 🐳 Getting Started (Docker)
 
-To run the database and the management tools locally:
+To run the database and the management tools (PgAdmin) locally:
 
-1. Clone the repository.
-2. Ensure Docker is running.
-3. Execute:
+1.  Clone the repository.
+2.  Ensure Docker is running.
+3.  Execute:
     ```bash
     docker-compose up -d
     ```
 
-The API will be accessible at `http://localhost:8080/api/v1`.
+The API will be accessible at `http://localhost:8080`.
 
-## 📌 API Endpoints (v1)
+## 📌 API Endpoints (Quick Reference)
 
 ### Categories
-* `GET /api/v1/categories` - List all categories as DTOs.
-* `POST /api/v1/categories` - Create a new category.
+* `GET /api/categories` - List all categories.
+* `POST /api/categories` - Create a new category.
 
 ### Transactions
-* `GET /api/v1/transactions` - List all transactions (including nested CategoryDTO).
-* `POST /api/v1/transactions` - Register a new financial transaction.
+* `GET /api/transactions` - List all transactions (including category details).
+* `POST /api/transactions` - Register a new financial transaction.
 
-## 🛡️ Standardized Error Response (Sample)
-```json
-{
-  "timestamp": "2026-02-18T19:24:16Z",
-  "status": 404,
-  "error": "Resource Not Found",
-  "message": "Resource not found. ID: 99",
-  "path": "/api/v1/transactions"
-}
+## 🚧 Roadmap & Issues
+
+- [x] **Issue #1:** Project Bootstrap & Docker Setup.
+- [x] **Issue #2:** Category Management Implementation.
+- [x] **Issue #3:** Transaction Logic & Service Layer.
+- [ ] **Issue #4:** Global Exception Handling (Upcoming).
+- [ ] **Issue #5:** DTO Pattern Implementation (Upcoming).
+- [ ] Issue #6: Unit Testing with JUnit 5 & Mockito (Upcoming).
+
+## 📄 License
+
+This project is licensed under the MIT License.
