@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import com.dustin.fintrack.dto.v1.TransactionDTO;
+
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -17,28 +19,25 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
 
-    /**
-     * Processes and saves a new transaction after validating the associated category.
-     * Part of Issue #3 requirements.
-     */
     @Transactional
-    public Transaction create(Transaction transaction) {
-        // Validation: Ensure the transaction has a category and a valid ID
+    public TransactionDTO create(Transaction transaction) {
         if (transaction.getCategory() == null || transaction.getCategory().getId() == null) {
             throw new RuntimeException("Transaction must have a valid category.");
         }
 
-        // Business Rule: Verify if the category exists in the database
         categoryRepository.findById(transaction.getCategory().getId())
-                .orElseThrow(() -> new ResourceNotFoundException(transaction.getCategory().getId())); // Mude para a sua nova Exception
+                .orElseThrow(() -> new ResourceNotFoundException(transaction.getCategory().getId()));
 
-        return transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        return new TransactionDTO(savedTransaction);
     }
 
-    /**
-     * Retrieves all transactions from the database.
-     */
-    public List<Transaction> listAll() {
-        return transactionRepository.findAll();
+    public List<TransactionDTO> listAll() {
+        List<Transaction> transactions = transactionRepository.findAll();
+
+        return transactions.stream()
+                .map(TransactionDTO::new)
+                .toList();
     }
 }

@@ -1,5 +1,6 @@
 package com.dustin.fintrack.controller.v1;
 
+import com.dustin.fintrack.dto.v1.TransactionDTO;
 import com.dustin.fintrack.model.Transaction;
 import com.dustin.fintrack.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.List;
 
 /**
  * Controller responsible for managing financial transactions.
- * Final step of Issue #3.
+ * Refactored to handle DTOs as part of Issue #5.
  */
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -21,16 +22,16 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping
-    public ResponseEntity<Transaction> create(@RequestBody Transaction transaction) {
-        // Calls the service layer to validate and persist the transaction
-        Transaction createdTransaction = transactionService.create(transaction);
+    public ResponseEntity<TransactionDTO> create(@RequestBody Transaction transaction) {
+        // Business layer now returns a DTO instead of an Entity
+        TransactionDTO createdTransaction = transactionService.create(transaction);
         return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> listAll() {
-        // Returns the complete list of transactions, including categories
-        List<Transaction> transactions = transactionService.listAll();
+    public ResponseEntity<List<TransactionDTO>> listAll() {
+        // Business layer now returns a List of DTOs
+        List<TransactionDTO> transactions = transactionService.listAll();
         return ResponseEntity.ok(transactions);
     }
 }
