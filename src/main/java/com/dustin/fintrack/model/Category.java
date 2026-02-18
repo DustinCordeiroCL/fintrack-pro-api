@@ -6,7 +6,7 @@ import lombok.*;
 @Entity
 @Table(name = "categories")
 @Data
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 public class Category {
 

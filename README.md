@@ -47,9 +47,9 @@ The API will be accessible at `http://localhost:8080`.
 - [x] **Issue #1:** Project Bootstrap & Docker Setup.
 - [x] **Issue #2:** Category Management Implementation.
 - [x] **Issue #3:** Transaction Logic & Service Layer.
-- [x] **Issue #4:** Global Exception Handling (Upcoming).
-- [x] **Issue #5:** DTO Pattern Implementation (Upcoming).
-- [ ] **Issue #6:** Unit Testing with JUnit 5 & Mockito (Upcoming).
+- [x] **Issue #4:** Global Exception Handling.
+- [x] **Issue #5:** DTO Pattern Implementation.
+- [X] **Issue #6:** Unit Testing with JUnit 5 & Mockito.
 
 ## 📄 License
 
