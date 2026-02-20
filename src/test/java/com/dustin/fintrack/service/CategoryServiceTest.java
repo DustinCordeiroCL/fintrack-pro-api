@@ -1,5 +1,6 @@
 package com.dustin.fintrack.service;
 
+import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
 import com.dustin.fintrack.dto.v1.CategoryDTO;
 import com.dustin.fintrack.model.Category;
 import com.dustin.fintrack.repository.CategoryRepository;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,5 +67,52 @@ public class CategoryServiceTest {
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
         assertEquals("Electronics", result.get(0).getName());
+    }
+
+    @Test
+    @DisplayName("Should update category when ID exists")
+    void updateShouldReturnUpdatedDtoWhenIdExists() {
+        // Arrange
+        Long id = 1L;
+        CategoryDTO dtoToUpdate = new CategoryDTO(null, "Novo Nome", "#FFF", "Nova Descrição");
+
+        when(categoryRepository.findById(id)).thenReturn(Optional.of(category));
+        when(categoryRepository.save(any(Category.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Act
+        CategoryDTO result = categoryService.update(id, dtoToUpdate);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("Novo Nome", result.getName());
+        assertEquals("#FFF", result.getColor());
+        verify(categoryRepository, times(1)).save(any(Category.class));
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when ID does not exist")
+    void updateShouldThrowExceptionWhenIdDoesNotExist() {
+        // Arrange
+        Long nonExistentId = 99L;
+        CategoryDTO dto = new CategoryDTO(null, "Erro", "#000", null);
+        when(categoryRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> {
+            categoryService.update(nonExistentId, dto);
+        });
+        verify(categoryRepository, never()).save(any(Category.class));
+    }
+
+    @Test
+    @DisplayName("Should call deleteById when ID exists")
+    void deleteShouldDoNothingWhenIdExists() {
+        // Arrange
+        Long id = 1L;
+        when(categoryRepository.findById(id)).thenReturn(Optional.of(category));
+
+        // Act & Assert
+        assertDoesNotThrow(() -> categoryService.delete(id));
+        verify(categoryRepository, times(1)).deleteById(id);
     }
 }

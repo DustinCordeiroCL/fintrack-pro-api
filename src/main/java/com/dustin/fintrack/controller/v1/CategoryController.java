@@ -4,7 +4,10 @@ import com.dustin.fintrack.dto.v1.CategoryDTO;
 import com.dustin.fintrack.model.Category;
 import com.dustin.fintrack.service.CategoryService;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.json.JSONFilter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,5 +32,17 @@ public class CategoryController {
         // Standardized list return using DTOs
         List<CategoryDTO> categories = categoryService.listAll();
         return ResponseEntity.ok(categories);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryDTO> update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
+        CategoryDTO updatedCategory = categoryService.update(id, dto);
+        return ResponseEntity.ok(updatedCategory);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        categoryService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

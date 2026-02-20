@@ -1,5 +1,6 @@
 package com.dustin.fintrack.service;
 
+import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
 import com.dustin.fintrack.dto.v1.CategoryDTO;
 import com.dustin.fintrack.model.Category;
 import com.dustin.fintrack.repository.CategoryRepository;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,5 +31,22 @@ public class CategoryService {
         return categories.stream()
                 .map(CategoryDTO::new)
                 .toList();
+    }
+
+    public CategoryDTO update(Long id, CategoryDTO dto) {
+        Category existingCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+
+        Optional.ofNullable(dto.getName()).ifPresent(existingCategory::setName);
+        Optional.ofNullable(dto.getColor()).ifPresent(existingCategory::setColor);
+
+        return new CategoryDTO(categoryRepository.save(existingCategory));
+    }
+
+    public void delete(Long id) {
+        Category existingCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+
+        categoryRepository.deleteById(existingCategory.getId());
     }
 }

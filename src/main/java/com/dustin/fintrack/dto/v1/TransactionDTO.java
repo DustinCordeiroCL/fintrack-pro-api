@@ -2,6 +2,7 @@ package com.dustin.fintrack.dto.v1;
 
 import com.dustin.fintrack.model.Transaction;
 import com.dustin.fintrack.model.TransactionType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class TransactionDTO {
     private Long id;
     private String description;
