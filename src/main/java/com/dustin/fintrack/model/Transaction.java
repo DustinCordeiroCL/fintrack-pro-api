@@ -23,7 +23,7 @@ public class Transaction {
     private BigDecimal amount;
 
     @Column(nullable = false)
-    private LocalDateTime date; // Changed to LocalDateTime for better precision
+    private LocalDateTime date;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -31,5 +31,5 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category; // Relationship correctly implemented
+    private Category category;
 }

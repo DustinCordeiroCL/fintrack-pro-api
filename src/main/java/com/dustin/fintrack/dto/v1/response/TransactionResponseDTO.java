@@ -1,5 +1,6 @@
-package com.dustin.fintrack.dto.v1;
+package com.dustin.fintrack.dto.v1.response;
 
+import com.dustin.fintrack.dto.v1.CategoryDTO;
 import com.dustin.fintrack.model.Transaction;
 import com.dustin.fintrack.model.TransactionType;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionDTO {
+public class TransactionResponseDTO {
     private Long id;
     private String description;
     private BigDecimal amount;
@@ -22,7 +23,7 @@ public class TransactionDTO {
     private TransactionType type;
     private CategoryDTO category;
 
-    public TransactionDTO(Transaction entity) {
+    public TransactionResponseDTO(Transaction entity) {
         this.id = entity.getId();
         this.description = entity.getDescription();
         this.amount = entity.getAmount();
