@@ -29,7 +29,6 @@ public class TransactionResponseDTO {
         this.amount = entity.getAmount();
         this.date = entity.getDate();
         this.type = entity.getType();
-        // Mapping the internal Category to CategoryDTO
         this.category = new CategoryDTO(entity.getCategory());
     }
 }

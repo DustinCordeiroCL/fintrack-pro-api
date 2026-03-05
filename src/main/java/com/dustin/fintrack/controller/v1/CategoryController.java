@@ -4,10 +4,7 @@ import com.dustin.fintrack.dto.v1.CategoryDTO;
 import com.dustin.fintrack.model.Category;
 import com.dustin.fintrack.service.CategoryService;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.json.JSONFilter;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,6 +1,7 @@
 package com.dustin.fintrack.controller.v1;
 
 import com.dustin.fintrack.dto.v1.request.TransactionRequestDTO;
+import com.dustin.fintrack.dto.v1.response.DashboardResponseDTO;
 import com.dustin.fintrack.dto.v1.response.TransactionResponseDTO;
 import com.dustin.fintrack.model.TransactionType;
 import com.dustin.fintrack.service.TransactionService;
@@ -27,34 +28,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TransactionControllerTest {
 
     @Autowired
-    private MockMvc mockMvc; // Simula requisições HTTP sem subir o servidor real
+    private MockMvc mockMvc;
 
-    @MockitoBean // Injeta um Mock do Service no contexto do Spring
+    @MockitoBean
     private TransactionService transactionService;
 
     @Autowired
-    private ObjectMapper objectMapper; // Converte objetos para JSON string
+    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("Should return 200 OK and list of transactions (Positive)")
     void listAllSuccess() throws Exception {
-        // 1. ARRANGE: Preparar um DTO de resposta para simular o retorno do Service
         TransactionResponseDTO response = new TransactionResponseDTO();
         response.setId(1L);
         response.setDescription("Salary");
         response.setAmount(new BigDecimal("5000.0"));
         response.setType(TransactionType.INCOME);
 
-        // Simula o comportamento do Service devolvendo uma lista com 1 elemento
         when(transactionService.listAll()).thenReturn(List.of(response));
 
-        // 2. ACT & ASSERT: Simula o GET no endpoint
-        // Por que: Validamos se a rota está correta e se o JSON retornado é um Array []
         mockMvc.perform(get("/api/v1/transactions")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()) // Espera 200 OK
-                .andExpect(jsonPath("$.size()").value(1)) // Verifica se a lista tem 1 item
-                .andExpect(jsonPath("$[0].description").value("Salary")) // Valida o conteúdo do primeiro item
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1))
+                .andExpect(jsonPath("$[0].description").value("Salary"))
                 .andExpect(jsonPath("$[0].amount").value(5000.0));
     }
 
@@ -68,7 +65,6 @@ public class TransactionControllerTest {
         request.setType(TransactionType.INCOME);
         request.setCategoryId(1L);
 
-        // Simulando o retorno do Service
         TransactionResponseDTO response = new TransactionResponseDTO();
         response.setId(1L);
         response.setDescription("Valid Transaction");
@@ -87,13 +83,49 @@ public class TransactionControllerTest {
     @DisplayName("Should return 400 Bad Request when amount is negative (Negative)")
     void createFailureInvalidData() throws Exception {
         TransactionRequestDTO request = new TransactionRequestDTO();
-        request.setDescription(""); // Inválido (NotBlank)
-        request.setAmount(new BigDecimal("-10.0")); // Inválido (Positive)
+        request.setDescription("");
+        request.setAmount(new BigDecimal("-10.0"));
 
-        // Comentário Didático: O teste nem chega no Service, o @Valid do Controller barra antes
         mockMvc.perform(post("/api/v1/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should return 200 OK and Dashboard date")
+    void getDashboardSuccess() throws Exception {
+        DashboardResponseDTO dashboardResponse = new DashboardResponseDTO();
+        dashboardResponse.setTotalIncome(new BigDecimal("1000.0"));
+        dashboardResponse.setTotalExpense(new BigDecimal("400.0"));
+        dashboardResponse.setBalance(new BigDecimal("600.0"));
+        dashboardResponse.setTransactions(List.of());
+
+        LocalDateTime start = LocalDateTime.of(2026, 1, 1, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 1, 31, 23, 59);
+
+        when(transactionService.getDashboardData(any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(dashboardResponse);
+
+        try {
+            mockMvc.perform(get("/api/v1/transactions/dashboard")
+                            .param("start", "2026-01-01T00:00:00")
+                            .param("end", "2026-01-31T23:59:59")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.totalIncome").value(1000.0))
+                    .andExpect(jsonPath("$.totalExpense").value(400.0))
+                    .andExpect(jsonPath("$.balance").value(600.0));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when date parameters are missing")
+    void getDashboardMissingParams() throws Exception {
+        mockMvc.perform(get("/api/v1/transactions/dashboard")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 }
