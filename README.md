@@ -1,6 +1,6 @@
 # FinTrack Pro API 🚀
 
-**FinTrack Pro** is a robust Financial Management API built with **Java 21** and **Spring Boot 3**. This project serves as the backbone for a personal finance ecosystem, featuring a clean architecture and production-ready configurations.
+**FinTrack Pro** is a robust Financial Management API built with **Java 21** and **Spring Boot 3**. This project serves as the backbone for a personal finance ecosystem, featuring a clean architecture, financial intelligence through dashboards, and production-ready configurations.
 
 ## 🛠 Tech Stack
 
@@ -8,6 +8,7 @@
 * **Framework:** Spring Boot 3.4.2
 * **Persistence:** Spring Data JPA / Hibernate
 * **Database:** PostgreSQL 16 (Development via Docker)
+* **Testing:** JUnit 5, Mockito, MockMvc (Full Service & Controller Coverage)
 * **Documentation:** SpringDoc OpenAPI (Swagger UI)
 * **Utilities:** Lombok, Jakarta Validation
 
@@ -15,9 +16,10 @@
 
 The project follows the **Controller-Service-Repository** pattern to ensure separation of concerns:
 * **Models:** JPA Entities representing the database schema.
-* **Repositories:** Abstraction layer for database operations.
-* **Services:** Centralized business logic and validations.
-* **Controllers:** REST endpoints for external communication.
+* **DTOs:** Data Transfer Objects (v1) for decoupled and secure API responses.
+* **Repositories:** Abstraction layer for database operations (including custom Date Range queries).
+* **Services:** Centralized business logic, financial calculations, and null-safe mapping.
+* **Handlers:** Global Exception Handling for standardized API error responses.
 
 ## 🐳 Getting Started (Docker)
 
@@ -31,25 +33,34 @@ To run the database and the management tools (PgAdmin) locally:
     ```
 
 The API will be accessible at `http://localhost:8080`.
+Swagger UI available at: `http://localhost:8080/swagger-ui.html`
 
 ## 📌 API Endpoints (Quick Reference)
 
-### Categories
-* `GET /api/categories` - List all categories.
-* `POST /api/categories` - Create a new category.
+### 📂 Categories (`/api/v1/categories`)
+* `GET /` - List all categories.
+* `POST /` - Create a new category.
+* `PUT /{id}` - Update an existing category.
+* `DELETE /{id}` - Remove a category.
 
-### Transactions
-* `GET /api/transactions` - List all transactions (including category details).
-* `POST /api/transactions` - Register a new financial transaction.
+### 💸 Transactions (`/api/v1/transactions`)
+* `GET /` - List all transactions with details.
+* `POST /` - Register a new financial transaction.
+* `PUT /{id}` - Update transaction data.
+* `DELETE /{id}` - Remove a transaction.
+* `GET /dashboard?start={date}&end={date}` - Financial summary (Income, Expense, Balance) for a specific date range.
 
-## 🚧 Roadmap & Issues
+## 🚧 Roadmap & Issues Progress
 
-- [x] **Issue #1:** Project Bootstrap & Docker Setup.
-- [x] **Issue #2:** Category Management Implementation.
-- [x] **Issue #3:** Transaction Logic & Service Layer.
-- [x] **Issue #4:** Global Exception Handling.
-- [x] **Issue #5:** DTO Pattern Implementation.
-- [X] **Issue #6:** Unit Testing with JUnit 5 & Mockito.
+- [x] **Issue #1:** Initial project setup and domain mapping (Transaction & Category).
+- [x] **Issue #2:** Project Foundation and Category Management (Docker & PostgreSQL).
+- [x] **Issue #3:** Transaction Implementation and Service Layer logic.
+- [x] **Issue #4:** Global Exception Handling (StandardError & ResourceNotFound).
+- [x] **Issue #5:** Data Transfer Objects (DTO) Implementation for v1.
+- [x] **Issue #6:** API Versioning Implementation (/api/v1).
+- [x] **Issue #7:** Unit Testing with JUnit 5 & Mockito (Service Layer).
+- [x] **Issue #8:** Complete Category CRUD & Integration Testing (MockMvc).
+- [x] **Issue #9:** Transaction Management & Dashboard Business Rules.
 
 ## 📄 License
 
