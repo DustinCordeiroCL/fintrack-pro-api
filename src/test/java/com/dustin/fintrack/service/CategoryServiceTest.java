@@ -32,7 +32,6 @@ public class CategoryServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize a test entity
         category = new Category();
         category.setId(1L);
         category.setName("Electronics");
@@ -42,13 +41,10 @@ public class CategoryServiceTest {
     @Test
     @DisplayName("Should save a category and return CategoryDTO")
     void shouldSaveCategory() {
-        // Arrange: Define behavior for the mock
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
-        // Act: Call the method under test
         CategoryDTO result = categoryService.create(category);
 
-        // Assert: Verify results
         assertNotNull(result);
         assertEquals("Electronics", result.getName());
         verify(categoryRepository, times(1)).save(any(Category.class));
@@ -57,13 +53,10 @@ public class CategoryServiceTest {
     @Test
     @DisplayName("Should list all categories as DTOs")
     void shouldListAllCategories() {
-        // Arrange
         when(categoryRepository.findAll()).thenReturn(List.of(category));
 
-        // Act
         List<CategoryDTO> result = categoryService.listAll();
 
-        // Assert
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
         assertEquals("Electronics", result.get(0).getName());
@@ -72,17 +65,14 @@ public class CategoryServiceTest {
     @Test
     @DisplayName("Should update category when ID exists")
     void updateShouldReturnUpdatedDtoWhenIdExists() {
-        // Arrange
         Long id = 1L;
         CategoryDTO dtoToUpdate = new CategoryDTO(null, "Novo Nome", "#FFF", "Nova Descrição");
 
         when(categoryRepository.findById(id)).thenReturn(Optional.of(category));
         when(categoryRepository.save(any(Category.class))).thenAnswer(i -> i.getArgument(0));
 
-        // Act
         CategoryDTO result = categoryService.update(id, dtoToUpdate);
 
-        // Assert
         assertNotNull(result);
         assertEquals("Novo Nome", result.getName());
         assertEquals("#FFF", result.getColor());
@@ -92,12 +82,10 @@ public class CategoryServiceTest {
     @Test
     @DisplayName("Should throw ResourceNotFoundException when ID does not exist")
     void updateShouldThrowExceptionWhenIdDoesNotExist() {
-        // Arrange
         Long nonExistentId = 99L;
         CategoryDTO dto = new CategoryDTO(null, "Erro", "#000", null);
         when(categoryRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> {
             categoryService.update(nonExistentId, dto);
         });
@@ -107,12 +95,36 @@ public class CategoryServiceTest {
     @Test
     @DisplayName("Should call deleteById when ID exists")
     void deleteShouldDoNothingWhenIdExists() {
-        // Arrange
         Long id = 1L;
         when(categoryRepository.findById(id)).thenReturn(Optional.of(category));
 
-        // Act & Assert
         assertDoesNotThrow(() -> categoryService.delete(id));
         verify(categoryRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("Should return CategoryDTO when ID exists")
+    void findByIdShouldReturnDtoWhenIdExists() {
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+
+        CategoryDTO result = categoryService.findById(1L);
+
+        assertNotNull(result);
+        assertEquals("Electronics", result.getName());
+        assertEquals("#000000", result.getColor());
+
+        verify(categoryRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when ID does not exist")
+    void findByIdShouldThrowExceptionWhenIdDoesNotExist() {
+        when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            categoryService.findById(99L);
+        });
+
+        verify(categoryRepository, times(1)).findById(99L);
     }
 }

@@ -19,14 +19,12 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<CategoryDTO> create(@RequestBody Category category) {
-        // Now returns the decoupled DTO
         CategoryDTO createdCategory = categoryService.create(category);
         return new ResponseEntity<>(createdCategory, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<CategoryDTO>> listAll() {
-        // Standardized list return using DTOs
         List<CategoryDTO> categories = categoryService.listAll();
         return ResponseEntity.ok(categories);
     }
@@ -41,5 +39,12 @@ public class CategoryController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         categoryService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryDTO> findById(@PathVariable Long id) {
+        CategoryDTO category = categoryService.findById(id);
+
+        return ResponseEntity.ok(category);
     }
 }

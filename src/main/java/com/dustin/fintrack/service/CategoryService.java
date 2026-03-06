@@ -19,7 +19,6 @@ public class CategoryService {
 
     @Transactional
     public CategoryDTO create(Category category) {
-        // Saving the entity and converting the result to DTO
         Category savedCategory = categoryRepository.save(category);
         return new CategoryDTO(savedCategory);
     }
@@ -27,7 +26,6 @@ public class CategoryService {
     public List<CategoryDTO> listAll() {
         List<Category> categories = categoryRepository.findAll();
 
-        // Using Java Streams to map the list of entities to DTOs
         return categories.stream()
                 .map(CategoryDTO::new)
                 .toList();
@@ -48,5 +46,13 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
         categoryRepository.deleteById(existingCategory.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public CategoryDTO findById(Long id) {
+        Category category = categoryRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+
+        return new CategoryDTO(category);
     }
 }

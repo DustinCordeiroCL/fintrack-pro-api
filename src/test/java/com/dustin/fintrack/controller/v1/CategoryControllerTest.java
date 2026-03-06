@@ -1,6 +1,7 @@
 package com.dustin.fintrack.controller.v1;
 
 import com.dustin.fintrack.FintrackProApiApplication;
+import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
 import com.dustin.fintrack.dto.v1.CategoryDTO;
 import com.dustin.fintrack.service.CategoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,5 +61,35 @@ class CategoryControllerTest {
 
         mockMvc.perform(delete("/api/v1/categories/{id}", id))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/categories/{id} should return 200 OK when category exists")
+    void findByIdShouldReturn200() throws Exception {
+        Long id = 1L;
+        CategoryDTO dto = new CategoryDTO(id, "Electronics", "#000000", null);
+
+        when(categoryService.findById(id)).thenReturn(dto);
+
+        // CONCEITO — jsonPath():
+        // Navega pelo JSON da resposta para validar campos específicos.
+        // "$.name" significa: na raiz ($) do JSON, acesse o campo "name".
+        // Para objetos aninhados seria: "$.category.name"
+        mockMvc.perform(get("/api/v1/categories/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Electronics"))
+                .andExpect(jsonPath("$.color").value("#000000"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/categories/{id} should return 404 when category does not exist")
+    void findByIdShouldReturn404() throws Exception {
+        Long nonExistentId = 99L;
+
+        when(categoryService.findById(nonExistentId))
+                .thenThrow(new ResourceNotFoundException("Category not found with id: " + nonExistentId));
+
+        mockMvc.perform(get("/api/v1/categories/{id}", nonExistentId))
+                .andExpect(status().isNotFound());
     }
 }
