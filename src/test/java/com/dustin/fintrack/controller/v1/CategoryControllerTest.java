@@ -3,6 +3,7 @@ package com.dustin.fintrack.controller.v1;
 import com.dustin.fintrack.FintrackProApiApplication;
 import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
 import com.dustin.fintrack.dto.v1.CategoryDTO;
+import com.dustin.fintrack.model.CategoryType;
 import com.dustin.fintrack.service.CategoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,7 +42,7 @@ class CategoryControllerTest {
     @DisplayName("PUT /api/v1/categories/{id} should return 200 OK when category is updated")
     void updateShouldReturn200() throws Exception {
         Long id = 1L;
-        CategoryDTO dto = new CategoryDTO(id, "Lazer", "#000", "Categoria de testes");
+        CategoryDTO dto = new CategoryDTO(id, "Lazer", "#000", "Categoria de testes", CategoryType.ESSENTIAL, new BigDecimal("300000"));
         String jsonBody = objectMapper.writeValueAsString(dto);
 
         when(categoryService.update(eq(id), any(CategoryDTO.class))).thenReturn(dto);
@@ -67,14 +70,10 @@ class CategoryControllerTest {
     @DisplayName("GET /api/v1/categories/{id} should return 200 OK when category exists")
     void findByIdShouldReturn200() throws Exception {
         Long id = 1L;
-        CategoryDTO dto = new CategoryDTO(id, "Electronics", "#000000", null);
+        CategoryDTO dto = new CategoryDTO(id, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"));
 
         when(categoryService.findById(id)).thenReturn(dto);
 
-        // CONCEITO — jsonPath():
-        // Navega pelo JSON da resposta para validar campos específicos.
-        // "$.name" significa: na raiz ($) do JSON, acesse o campo "name".
-        // Para objetos aninhados seria: "$.category.name"
         mockMvc.perform(get("/api/v1/categories/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Electronics"))

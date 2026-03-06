@@ -31,4 +31,7 @@ public class TransactionRequestDTO {
 
         @NotNull(message = "Category ID is required")
         private Long categoryId;
+
+        private Integer dueDay;
+        private Boolean isPaid;
 }

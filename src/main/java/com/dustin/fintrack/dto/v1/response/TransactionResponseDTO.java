@@ -21,6 +21,8 @@ public class TransactionResponseDTO {
     private BigDecimal amount;
     private LocalDateTime date;
     private TransactionType type;
+    private Integer dueDay;
+    private Boolean isPaid;
     private CategoryDTO category;
 
     public TransactionResponseDTO(Transaction entity) {
@@ -29,6 +31,8 @@ public class TransactionResponseDTO {
         this.amount = entity.getAmount();
         this.date = entity.getDate();
         this.type = entity.getType();
+        this.dueDay = entity.getDueDay();
+        this.isPaid = entity.getIsPaid();
         this.category = new CategoryDTO(entity.getCategory());
     }
 }

@@ -59,10 +59,10 @@ public class TransactionServiceTest {
         transaction.setId(1L);
         transaction.setDescription("Cinema");
         transaction.setAmount(new BigDecimal("50.0"));
+        transaction.setDueDay(10);
+        transaction.setIsPaid(false);
         transaction.setCategory(category);
     }
-
-    // --- TESTES DO MÉTODO CREATE ---
 
     @Test
     @DisplayName("Should create transaction successfully (Positive)")
@@ -86,8 +86,6 @@ public class TransactionServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> transactionService.create(requestDTO));
         verify(transactionRepository, never()).save(any(Transaction.class));
     }
-
-    // --- TESTES DO MÉTODO LISTALL ---
 
     @Test
     @DisplayName("Should return a list of TransactionResponseDTO (Positive)")
@@ -131,10 +129,8 @@ public class TransactionServiceTest {
 
         when(transactionRepository.findByDateRange(any(), any())).thenReturn(List.of(income, expense));
 
-        // ACT
         DashboardResponseDTO result = transactionService.getDashboardData(start, end);
 
-        // ASSERT
         assertEquals(0, new BigDecimal("100.0").compareTo(result.getTotalIncome()));
         assertEquals(0, new BigDecimal("40.0").compareTo(result.getTotalExpense()));
         assertEquals(0, new BigDecimal("60.0").compareTo(result.getBalance()));
@@ -152,5 +148,17 @@ public class TransactionServiceTest {
         assertEquals(BigDecimal.ZERO, result.getTotalExpense());
         assertEquals(BigDecimal.ZERO, result.getBalance());
         assertTrue(result.getTransactions().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should persist dueDay and isPaid correctly")
+    void shouldPersistNewTransactionFields() {
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
+        when(categoryRepository.findById(any())).thenReturn(Optional.of(category));
+
+        TransactionResponseDTO result = transactionService.create(requestDTO);
+
+        assertEquals(10, result.getDueDay());
+        assertFalse(result.getIsPaid());
     }
 }

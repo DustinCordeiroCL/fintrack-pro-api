@@ -28,17 +28,27 @@ To run the database and the management tools (PgAdmin) locally:
 1.  Clone the repository.
 2.  Ensure Docker is running.
 3.  Execute:
-    ```bash
+```bash
     docker-compose up -d
-    ```
+```
 
 The API will be accessible at `http://localhost:8080`.
 Swagger UI available at: `http://localhost:8080/swagger-ui.html`
+
+## ⚙️ Environment Profiles
+
+The project uses Spring Boot profiles to separate environment configurations:
+
+* **Development** (`application-dev.properties`): Local PostgreSQL via Docker, SQL logging enabled, `ddl-auto=update`.
+* **Production** (`application-prod.properties`): Credentials via environment variables (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`), SQL logging disabled, `ddl-auto=validate`.
+
+To switch profiles, update `spring.profiles.active` in `application.properties`.
 
 ## 📌 API Endpoints (Quick Reference)
 
 ### 📂 Categories (`/api/v1/categories`)
 * `GET /` - List all categories.
+* `GET /{id}` - Get a specific category by ID.
 * `POST /` - Create a new category.
 * `PUT /{id}` - Update an existing category.
 * `DELETE /{id}` - Remove a category.
@@ -46,12 +56,11 @@ Swagger UI available at: `http://localhost:8080/swagger-ui.html`
 ### 💸 Transactions (`/api/v1/transactions`)
 * `GET /` - List all transactions with details.
 * `POST /` - Register a new financial transaction.
-* `PUT /{id}` - Update transaction data.
-* `DELETE /{id}` - Remove a transaction.
 * `GET /dashboard?start={date}&end={date}` - Financial summary (Income, Expense, Balance) for a specific date range.
 
 ## 🚧 Roadmap & Issues Progress
 
+### ✅ V1 — Core API
 - [x] **Issue #1:** Initial project setup and domain mapping (Transaction & Category).
 - [x] **Issue #2:** Project Foundation and Category Management (Docker & PostgreSQL).
 - [x] **Issue #3:** Transaction Implementation and Service Layer logic.
@@ -61,6 +70,13 @@ Swagger UI available at: `http://localhost:8080/swagger-ui.html`
 - [x] **Issue #7:** Unit Testing with JUnit 5 & Mockito (Service Layer).
 - [x] **Issue #8:** Complete Category CRUD & Integration Testing (MockMvc).
 - [x] **Issue #9:** Transaction Management & Dashboard Business Rules.
+- [x] **Issue #10:** Complete Category CRUD — GET /{id} endpoint.
+- [x] **Issue #11:** Domain Enrichment (Category & Transaction).
+- [ ] **Issue #12:** Complete Transaction CRUD — GET /{id}, PUT /{id}, DELETE /{id}.
+
+### 🔒 V2 — Security & Multi-Tenancy
+- [ ] **Issue #13:** User entity + Spring Security + JWT Authentication.
+- [ ] **Issue #14:** Data isolation — Category and Transaction linked to authenticated User.
 
 ## 📄 License
 

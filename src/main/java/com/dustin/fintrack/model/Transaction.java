@@ -32,4 +32,10 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @Column
+    private Integer dueDay;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private Boolean isPaid = false;
 }

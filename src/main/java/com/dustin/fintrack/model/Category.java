@@ -3,6 +3,8 @@ package com.dustin.fintrack.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "categories")
 @Data
@@ -17,4 +19,20 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
     private String color;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CategoryType categoryType;
+
+    @Column
+    private BigDecimal spendingLimit;
+
+/*
+@Enumerated(EnumType.STRING)
+@Column(nullable = false)
+private CategoryType categoryType;
+
+@Column
+private BigDecimal spendingLimit;
+*/
 }
