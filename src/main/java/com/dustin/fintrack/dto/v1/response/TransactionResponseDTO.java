@@ -1,6 +1,5 @@
 package com.dustin.fintrack.dto.v1.response;
 
-import com.dustin.fintrack.dto.v1.CategoryDTO;
 import com.dustin.fintrack.model.Transaction;
 import com.dustin.fintrack.model.TransactionType;
 import lombok.AllArgsConstructor;
@@ -23,7 +22,7 @@ public class TransactionResponseDTO {
     private TransactionType type;
     private Integer dueDay;
     private Boolean isPaid;
-    private CategoryDTO category;
+    private CategoryResponseDTO category;
 
     public TransactionResponseDTO(Transaction entity) {
         this.id = entity.getId();
@@ -33,6 +32,6 @@ public class TransactionResponseDTO {
         this.type = entity.getType();
         this.dueDay = entity.getDueDay();
         this.isPaid = entity.getIsPaid();
-        this.category = new CategoryDTO(entity.getCategory());
+        this.category = new CategoryResponseDTO(entity.getCategory());
     }
 }

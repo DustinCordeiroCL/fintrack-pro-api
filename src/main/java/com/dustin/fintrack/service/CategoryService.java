@@ -1,7 +1,8 @@
 package com.dustin.fintrack.service;
 
 import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
-import com.dustin.fintrack.dto.v1.CategoryDTO;
+import com.dustin.fintrack.dto.v1.request.CategoryRequestDTO;
+import com.dustin.fintrack.dto.v1.response.CategoryResponseDTO;
 import com.dustin.fintrack.model.Category;
 import com.dustin.fintrack.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,27 +19,36 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    public CategoryDTO create(Category category) {
+    public CategoryResponseDTO create(CategoryRequestDTO request) {
+        Category category = new Category();
+        category.setName(request.getName());
+        category.setColor(request.getColor());
+        category.setCategoryType(request.getCategoryType());
+        category.setSpendingLimit(request.getSpendingLimit());
+
         Category savedCategory = categoryRepository.save(category);
-        return new CategoryDTO(savedCategory);
+
+        return new CategoryResponseDTO(savedCategory);
     }
 
-    public List<CategoryDTO> listAll() {
-        List<Category> categories = categoryRepository.findAll();
-
-        return categories.stream()
-                .map(CategoryDTO::new)
+    @Transactional(readOnly = true)
+    public List<CategoryResponseDTO> listAll() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(CategoryResponseDTO::new)
                 .toList();
     }
 
-    public CategoryDTO update(Long id, CategoryDTO dto) {
+    public CategoryResponseDTO update(Long id, CategoryRequestDTO dto) {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
         Optional.ofNullable(dto.getName()).ifPresent(existingCategory::setName);
         Optional.ofNullable(dto.getColor()).ifPresent(existingCategory::setColor);
+        Optional.ofNullable(dto.getCategoryType()).ifPresent(existingCategory::setCategoryType);
+        Optional.ofNullable(dto.getSpendingLimit()).ifPresent(existingCategory::setSpendingLimit);
 
-        return new CategoryDTO(categoryRepository.save(existingCategory));
+        return new CategoryResponseDTO(categoryRepository.save(existingCategory));
     }
 
     public void delete(Long id) {
@@ -49,10 +59,10 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public CategoryDTO findById(Long id) {
+    public CategoryResponseDTO findById(Long id) {
         Category category = categoryRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
-        return new CategoryDTO(category);
+        return new CategoryResponseDTO(category);
     }
 }

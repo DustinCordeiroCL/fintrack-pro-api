@@ -1,4 +1,4 @@
-package com.dustin.fintrack.dto.v1;
+package com.dustin.fintrack.dto.v1.response;
 
 import com.dustin.fintrack.model.Category;
 import com.dustin.fintrack.model.CategoryType;
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDTO {
+public class CategoryResponseDTO {
     private Long id;
     private String name;
     private String color;
@@ -21,7 +21,7 @@ public class CategoryDTO {
     private CategoryType categoryType;
     private BigDecimal spendingLimit;
 
-    public CategoryDTO(Category entity) {
+    public CategoryResponseDTO(Category entity) {
         this.id = entity.getId();
         this.name = entity.getName();
         this.color = entity.getColor();

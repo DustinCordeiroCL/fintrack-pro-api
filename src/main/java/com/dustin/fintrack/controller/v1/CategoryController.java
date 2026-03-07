@@ -1,7 +1,7 @@
 package com.dustin.fintrack.controller.v1;
 
-import com.dustin.fintrack.dto.v1.CategoryDTO;
-import com.dustin.fintrack.model.Category;
+import com.dustin.fintrack.dto.v1.request.CategoryRequestDTO;
+import com.dustin.fintrack.dto.v1.response.CategoryResponseDTO;
 import com.dustin.fintrack.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,20 +18,20 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<CategoryDTO> create(@RequestBody Category category) {
-        CategoryDTO createdCategory = categoryService.create(category);
+    public ResponseEntity<CategoryResponseDTO> create(@RequestBody CategoryRequestDTO category) {
+        CategoryResponseDTO createdCategory = categoryService.create(category);
         return new ResponseEntity<>(createdCategory, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryDTO>> listAll() {
-        List<CategoryDTO> categories = categoryService.listAll();
+    public ResponseEntity<List<CategoryResponseDTO>> listAll() {
+        List<CategoryResponseDTO> categories = categoryService.listAll();
         return ResponseEntity.ok(categories);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDTO> update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
-        CategoryDTO updatedCategory = categoryService.update(id, dto);
+    public ResponseEntity<CategoryResponseDTO> update(@PathVariable Long id, @RequestBody CategoryRequestDTO dto) {
+        CategoryResponseDTO updatedCategory = categoryService.update(id, dto);
         return ResponseEntity.ok(updatedCategory);
     }
 
@@ -42,8 +42,8 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryDTO> findById(@PathVariable Long id) {
-        CategoryDTO category = categoryService.findById(id);
+    public ResponseEntity<CategoryResponseDTO> findById(@PathVariable Long id) {
+        CategoryResponseDTO category = categoryService.findById(id);
 
         return ResponseEntity.ok(category);
     }

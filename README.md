@@ -55,7 +55,10 @@ To switch profiles, update `spring.profiles.active` in `application.properties`.
 
 ### 💸 Transactions (`/api/v1/transactions`)
 * `GET /` - List all transactions with details.
+* `GET /{id}` - Get a specific transaction by ID.
 * `POST /` - Register a new financial transaction.
+* `PUT /{id}` - Update an existing transaction.
+* `DELETE /{id}` - Remove a transaction.
 * `GET /dashboard?start={date}&end={date}` - Financial summary (Income, Expense, Balance) for a specific date range.
 
 ## 🚧 Roadmap & Issues Progress
@@ -72,11 +75,15 @@ To switch profiles, update `spring.profiles.active` in `application.properties`.
 - [x] **Issue #9:** Transaction Management & Dashboard Business Rules.
 - [x] **Issue #10:** Complete Category CRUD — GET /{id} endpoint.
 - [x] **Issue #11:** Domain Enrichment (Category & Transaction).
-- [ ] **Issue #12:** Complete Transaction CRUD — GET /{id}, PUT /{id}, DELETE /{id}.
+- [x] **Issue #12:** Complete Transaction CRUD — GET /{id}, PUT /{id}, DELETE /{id}.
+- [x] **Issue #13:** Category DTO Refactoring (Request/Response Separation).
 
 ### 🔒 V2 — Security & Multi-Tenancy
-- [ ] **Issue #13:** User entity + Spring Security + JWT Authentication.
-- [ ] **Issue #14:** Data isolation — Category and Transaction linked to authenticated User.
+- [ ] **Issue #14:** User entity + Spring Security + JWT Authentication.
+- [ ] **Issue #15:** Data isolation — Category and Transaction linked to authenticated User.
+
+### 🖥️ Frontend Integration
+- [ ] Issues to be defined after FinTrack Pro Web V1 is complete.
 
 ## 📄 License
 
