@@ -1,5 +1,6 @@
 package com.dustin.fintrack.controller.v1;
 
+import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
 import com.dustin.fintrack.dto.v1.request.TransactionRequestDTO;
 import com.dustin.fintrack.dto.v1.response.DashboardResponseDTO;
 import com.dustin.fintrack.dto.v1.response.TransactionResponseDTO;
@@ -19,9 +20,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(TransactionController.class)
@@ -37,7 +38,7 @@ public class TransactionControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("Should return 200 OK and list of transactions (Positive)")
+    @DisplayName("Should return 200 OK and list of transactions")
     void listAllSuccess() throws Exception {
         TransactionResponseDTO response = new TransactionResponseDTO();
         response.setId(1L);
@@ -56,7 +57,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 201 Created when transaction is valid (Positive)")
+    @DisplayName("Should return 201 Created when transaction is valid")
     void createSuccess() throws Exception {
         TransactionRequestDTO request = new TransactionRequestDTO();
         request.setDescription("Valid Transaction");
@@ -80,7 +81,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 400 Bad Request when amount is negative (Negative)")
+    @DisplayName("Should return 400 Bad Request when amount is negative")
     void createFailureInvalidData() throws Exception {
         TransactionRequestDTO request = new TransactionRequestDTO();
         request.setDescription("");
@@ -127,5 +128,101 @@ public class TransactionControllerTest {
         mockMvc.perform(get("/api/v1/transactions/dashboard")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    // --- findById ---
+
+    @Test
+    @DisplayName("GET /api/v1/transactions/{id} should return 200 OK when transaction exists")
+    void findByIdSuccess() throws Exception {
+        TransactionResponseDTO response = new TransactionResponseDTO();
+        response.setId(1L);
+        response.setDescription("Shopping");
+        response.setDueDay(10);
+        response.setIsPaid(false);
+
+        when(transactionService.findById(1L)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/transactions/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description").value("Shopping"))
+                .andExpect(jsonPath("$.dueDay").value(10));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/transactions/{id} should return 404 when transaction does not exist")
+    void findByIdNotFound() throws Exception {
+        when(transactionService.findById(99L))
+                .thenThrow(new ResourceNotFoundException("Transaction not found with id 99"));
+
+        mockMvc.perform(get("/api/v1/transactions/{id}", 99L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/transactions/{id} should return 200 OK when transaction is updated")
+    void updateSuccess() throws Exception {
+        TransactionRequestDTO request = new TransactionRequestDTO();
+        request.setDescription("Cinema Atualizado");
+        request.setAmount(new BigDecimal("80.0"));
+        request.setDate(LocalDateTime.now());
+        request.setType(TransactionType.EXPENSE);
+        request.setCategoryId(1L);
+        request.setDueDay(15);
+        request.setIsPaid(true);
+
+        TransactionResponseDTO response = new TransactionResponseDTO();
+        response.setId(1L);
+        response.setDescription("Cinema Atualizado");
+        response.setDueDay(15);
+        response.setIsPaid(true);
+
+        when(transactionService.update(eq(1L), any(TransactionRequestDTO.class))).thenReturn(response);
+
+        mockMvc.perform(put("/api/v1/transactions/{id}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description").value("Cinema Atualizado"))
+                .andExpect(jsonPath("$.dueDay").value(15))
+                .andExpect(jsonPath("$.isPaid").value(true));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/transactions/{id} should return 404 when transaction does not exist")
+    void updateNotFound() throws Exception {
+    TransactionRequestDTO request = new TransactionRequestDTO();
+    request.setDescription("Erro");
+    request.setAmount(new BigDecimal("10.0"));
+    request.setDate(LocalDateTime.now());
+    request.setType(TransactionType.EXPENSE);
+    request.setCategoryId(1L);
+
+    when(transactionService.update(eq(99L), any(TransactionRequestDTO.class)))
+            .thenThrow(new ResourceNotFoundException("Transaction not found with id: 99"));
+
+    mockMvc.perform(put("/api/v1/transactions/{id}", 99L)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/transactions/{id} should return 204 No Content")
+    void deleteSuccess() throws Exception {
+    doNothing().when(transactionService).delete(1L);
+
+    mockMvc.perform(delete("/api/v1/transactions/{id}", 1L))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/transactions/{id} should return 404 when transaction does not exist")
+    void deleteNotFound() throws Exception {
+    doThrow(new ResourceNotFoundException("Transaction not found with id: 99"))
+            .when(transactionService).delete(99L);
+
+    mockMvc.perform(delete("/api/v1/transactions/{id}", 99L))
+            .andExpect(status().isNotFound());
     }
 }

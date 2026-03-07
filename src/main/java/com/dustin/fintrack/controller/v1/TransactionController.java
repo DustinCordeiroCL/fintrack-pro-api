@@ -42,4 +42,25 @@ public class TransactionController {
 
         return ResponseEntity.ok(dashboardData);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TransactionResponseDTO> findById(@PathVariable Long id) {
+        TransactionResponseDTO transaction = transactionService.findById(id);
+        return ResponseEntity.ok(transaction);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TransactionResponseDTO> update(
+            @PathVariable Long id,
+            @Valid @RequestBody TransactionRequestDTO request) {
+        TransactionResponseDTO response = transactionService.update(id, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        transactionService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

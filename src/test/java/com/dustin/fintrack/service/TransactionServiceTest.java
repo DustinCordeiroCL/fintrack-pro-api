@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,7 +66,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Should create transaction successfully (Positive)")
+    @DisplayName("Should create transaction successfully")
     void createSuccess() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
@@ -79,7 +80,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw ResourceNotFoundException when category not found (Negative)")
+    @DisplayName("Should throw ResourceNotFoundException when category not found")
     void createCategoryNotFound() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -88,7 +89,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Should return a list of TransactionResponseDTO (Positive)")
+    @DisplayName("Should return a list of TransactionResponseDTO")
     void listAllSuccess() {
         when(transactionRepository.findAll()).thenReturn(List.of(transaction));
 
@@ -101,7 +102,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Should return an empty list when no transactions exist (Positive)")
+    @DisplayName("Should return an empty list when no transactions exist")
     void listAllEmpty() {
         when(transactionRepository.findAll()).thenReturn(List.of());
 
@@ -160,5 +161,72 @@ public class TransactionServiceTest {
 
         assertEquals(10, result.getDueDay());
         assertFalse(result.getIsPaid());
+    }
+
+    @Test
+    @DisplayName("Should return TransactionResponseDTO when ID exists")
+    void findByIdSuccess() {
+    when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
+
+    TransactionResponseDTO result = transactionService.findById(1L);
+
+    assertNotNull(result);
+    assertEquals("Cinema", result.getDescription());
+    assertEquals(10, result.getDueDay());
+    verify(transactionRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when transaction ID does not exist")
+    void findByIdNotFound() {
+        when(transactionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> transactionService.findById(99L));
+        verify(transactionRepository, times(1)).findById(99L);
+    }
+
+    @Test
+    @DisplayName("Should update transaction and return updated DTO")
+    void updateSuccess() {
+        requestDTO.setDescription("Show");
+        requestDTO.setAmount(new BigDecimal("80.0"));
+        requestDTO.setDueDay(15);
+        requestDTO.setIsPaid(true);
+
+        when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        TransactionResponseDTO result = transactionService.update(1L, requestDTO);
+
+        assertNotNull(result);
+        verify(transactionRepository, times(1)).save(any(Transaction.class));
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when updating non-existent transaction")
+    void updateNotFound() {
+        when(transactionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> transactionService.update(99L, requestDTO));
+        verify(transactionRepository, never()).save(any(Transaction.class));
+    }
+
+    @Test
+    @DisplayName("Should delete transaction when ID exists (Positive)")
+    void deleteSuccess() {
+        when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
+
+        assertDoesNotThrow(() -> transactionService.delete(1L));
+        verify(transactionRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when deleting non-existent transaction (Negative)")
+    void deleteNotFound() {
+        when(transactionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> transactionService.delete(99L));
+        verify(transactionRepository, never()).deleteById(any());
     }
 }
