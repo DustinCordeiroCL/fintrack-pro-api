@@ -23,6 +23,7 @@ public class CategoryService {
         Category category = new Category();
         category.setName(request.getName());
         category.setColor(request.getColor());
+        category.setDescription(request.getDescription());
         category.setCategoryType(request.getCategoryType());
         category.setSpendingLimit(request.getSpendingLimit());
 
@@ -45,6 +46,7 @@ public class CategoryService {
 
         Optional.ofNullable(dto.getName()).ifPresent(existingCategory::setName);
         Optional.ofNullable(dto.getColor()).ifPresent(existingCategory::setColor);
+        Optional.ofNullable(dto.getDescription()).ifPresent(existingCategory::setDescription);
         Optional.ofNullable(dto.getCategoryType()).ifPresent(existingCategory::setCategoryType);
         Optional.ofNullable(dto.getSpendingLimit()).ifPresent(existingCategory::setSpendingLimit);
 

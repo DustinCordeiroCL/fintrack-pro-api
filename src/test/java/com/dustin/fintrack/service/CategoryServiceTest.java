@@ -40,12 +40,14 @@ public class CategoryServiceTest {
         category.setId(1L);
         category.setName("Electronics");
         category.setColor("#000000");
+        category.setDescription("Unity tests");
         category.setCategoryType(CategoryType.ESSENTIAL);
         category.setSpendingLimit(new BigDecimal("300000"));
 
         request = new CategoryRequestDTO();
         request.setName("Electronics");
         request.setColor("#000000");
+        category.setDescription("Unity tests DTO");
         request.setCategoryType(CategoryType.ESSENTIAL);
         request.setSpendingLimit(new BigDecimal("300000"));
     }
@@ -80,6 +82,7 @@ public class CategoryServiceTest {
         CategoryRequestDTO requestToUpdate = new CategoryRequestDTO();
         requestToUpdate.setName("Novo Nome");
         requestToUpdate.setColor("#FFF");
+        requestToUpdate.setDescription("Unity tests");
         requestToUpdate.setCategoryType(CategoryType.DISCRETIONARY);
         requestToUpdate.setSpendingLimit(new BigDecimal("500000"));
 
@@ -91,6 +94,7 @@ public class CategoryServiceTest {
         assertNotNull(result);
         assertEquals("Novo Nome", result.getName());
         assertEquals("#FFF", result.getColor());
+        assertEquals("Unity tests", result.getDescription());
         assertEquals(CategoryType.DISCRETIONARY, result.getCategoryType());
         assertEquals(new BigDecimal("500000"), result.getSpendingLimit());
         verify(categoryRepository, times(1)).save(any(Category.class));
@@ -133,6 +137,7 @@ public class CategoryServiceTest {
         assertNotNull(result);
         assertEquals("Electronics", result.getName());
         assertEquals("#000000", result.getColor());
+        assertEquals("Unity tests DTO", result.getDescription());
         assertEquals(CategoryType.ESSENTIAL, result.getCategoryType());
         assertEquals(new BigDecimal("300000"), result.getSpendingLimit());
         verify(categoryRepository, times(1)).findById(1L);

@@ -25,6 +25,7 @@ public class CategoryResponseDTO {
         this.id = entity.getId();
         this.name = entity.getName();
         this.color = entity.getColor();
+        this.description = entity.getDescription();
         this.categoryType = entity.getCategoryType();
         this.spendingLimit = entity.getSpendingLimit();
     }

@@ -24,6 +24,9 @@ public class Category {
     @Column(nullable = false)
     private CategoryType categoryType;
 
+    @Column(nullable = true)
+    private String description;
+
     @Column
     private BigDecimal spendingLimit;
 }
