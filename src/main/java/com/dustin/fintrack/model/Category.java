@@ -26,13 +26,4 @@ public class Category {
 
     @Column
     private BigDecimal spendingLimit;
-
-/*
-@Enumerated(EnumType.STRING)
-@Column(nullable = false)
-private CategoryType categoryType;
-
-@Column
-private BigDecimal spendingLimit;
-*/
 }
