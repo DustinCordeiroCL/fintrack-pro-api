@@ -6,12 +6,15 @@ import com.dustin.fintrack.dto.v1.request.CategoryRequestDTO;
 import com.dustin.fintrack.dto.v1.response.CategoryResponseDTO;
 import com.dustin.fintrack.model.CategoryType;
 import com.dustin.fintrack.service.CategoryService;
+import com.dustin.fintrack.service.JwtService;
+import com.dustin.fintrack.service.UserDetailsServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,10 +25,12 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WithMockUser
 @WebMvcTest(CategoryController.class)
 @ContextConfiguration(classes = FintrackProApiApplication.class)
 class CategoryControllerTest {
@@ -39,9 +44,16 @@ class CategoryControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsServiceImpl userDetailsService;
+
     @Test
     @DisplayName("POST /api/v1/categories should return 201 Created")
     void createShouldReturn201() throws Exception {
+        // Arrange
         CategoryRequestDTO request = new CategoryRequestDTO();
         request.setName("Electronics");
         request.setColor("#000000");
@@ -52,7 +64,9 @@ class CategoryControllerTest {
 
         when(categoryService.create(any(CategoryRequestDTO.class))).thenReturn(response);
 
+        // Act & Assert
         mockMvc.perform(post("/api/v1/categories")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -63,10 +77,11 @@ class CategoryControllerTest {
     @Test
     @DisplayName("GET /api/v1/categories should return 200 OK with list")
     void listAllShouldReturn200() throws Exception {
+        // Arrange
         CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"));
-
         when(categoryService.listAll()).thenReturn(List.of(response));
 
+        // Act & Assert
         mockMvc.perform(get("/api/v1/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
@@ -76,6 +91,7 @@ class CategoryControllerTest {
     @Test
     @DisplayName("PUT /api/v1/categories/{id} should return 200 OK when category is updated")
     void updateShouldReturn200() throws Exception {
+        // Arrange
         CategoryRequestDTO request = new CategoryRequestDTO();
         request.setName("Lazer");
         request.setColor("#000");
@@ -83,10 +99,11 @@ class CategoryControllerTest {
         request.setSpendingLimit(new BigDecimal("300000"));
 
         CategoryResponseDTO response = new CategoryResponseDTO(1L, "Lazer", "#000", null, CategoryType.DISCRETIONARY, new BigDecimal("300000"));
-
         when(categoryService.update(eq(1L), any(CategoryRequestDTO.class))).thenReturn(response);
 
+        // Act & Assert
         mockMvc.perform(put("/api/v1/categories/{id}", 1L)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -97,13 +114,16 @@ class CategoryControllerTest {
     @Test
     @DisplayName("PUT /api/v1/categories/{id} should return 404 when category does not exist")
     void updateShouldReturn404() throws Exception {
+        // Arrange
         CategoryRequestDTO request = new CategoryRequestDTO();
         request.setName("Erro");
 
         when(categoryService.update(eq(99L), any(CategoryRequestDTO.class)))
                 .thenThrow(new ResourceNotFoundException("Category not found with id: 99"));
 
+        // Act & Assert
         mockMvc.perform(put("/api/v1/categories/{id}", 99L)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -112,29 +132,36 @@ class CategoryControllerTest {
     @Test
     @DisplayName("DELETE /api/v1/categories/{id} should return 204 No Content")
     void deleteShouldReturn204() throws Exception {
+        // Arrange
         doNothing().when(categoryService).delete(1L);
 
-        mockMvc.perform(delete("/api/v1/categories/{id}", 1L))
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/categories/{id}", 1L)
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("DELETE /api/v1/categories/{id} should return 404 when category does not exist")
     void deleteShouldReturn404() throws Exception {
+        // Arrange
         doThrow(new ResourceNotFoundException("Category not found with id: 99"))
                 .when(categoryService).delete(99L);
 
-        mockMvc.perform(delete("/api/v1/categories/{id}", 99L))
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/categories/{id}", 99L)
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("GET /api/v1/categories/{id} should return 200 OK when category exists")
     void findByIdShouldReturn200() throws Exception {
+        // Arrange
         CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"));
-
         when(categoryService.findById(1L)).thenReturn(response);
 
+        // Act & Assert
         mockMvc.perform(get("/api/v1/categories/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Electronics"))
@@ -144,9 +171,11 @@ class CategoryControllerTest {
     @Test
     @DisplayName("GET /api/v1/categories/{id} should return 404 when category does not exist")
     void findByIdShouldReturn404() throws Exception {
+        // Arrange
         when(categoryService.findById(99L))
                 .thenThrow(new ResourceNotFoundException("Category not found with id: 99"));
 
+        // Act & Assert
         mockMvc.perform(get("/api/v1/categories/{id}", 99L))
                 .andExpect(status().isNotFound());
     }
