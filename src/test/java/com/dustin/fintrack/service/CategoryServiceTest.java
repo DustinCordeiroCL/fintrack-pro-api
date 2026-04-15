@@ -8,6 +8,7 @@ import com.dustin.fintrack.model.CategoryType;
 import com.dustin.fintrack.model.User;
 import com.dustin.fintrack.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,8 @@ public class CategoryServiceTest {
         category.setCategoryType(CategoryType.ESSENTIAL);
         category.setSpendingLimit(new BigDecimal("300000"));
         category.setUser(user);
+        category.setCreatedAt(LocalDateTime.now());
+        category.setUpdatedAt(LocalDateTime.now());
 
         request = new CategoryRequestDTO();
         request.setName("Electronics");

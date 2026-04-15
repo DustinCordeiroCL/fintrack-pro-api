@@ -70,6 +70,8 @@ public class TransactionServiceTest {
         transaction.setIsPaid(false);
         transaction.setCategory(category);
         transaction.setUser(user);
+        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setUpdatedAt(LocalDateTime.now());
     }
 
     @Test
