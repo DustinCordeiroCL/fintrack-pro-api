@@ -38,15 +38,15 @@ public class ResourceExceptionHandlerTest{
     }
 
     @Test
-    @DisplayName("Should handle RuntimeException and return 400 status")
+    @DisplayName("Should handle RuntimeException and return 500 without exposing internal details")
     void handleRuntimeExceptionTest() {
-        RuntimeException ex = new RuntimeException("Generic Error");
+        RuntimeException ex = new RuntimeException("Internal database error — sensitive detail");
         when(request.getRequestURI()).thenReturn("/api/v1/transactions");
 
         ResponseEntity<StandardError> response = handler.handleRuntimeException(ex, request);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Business Logic Error", response.getBody().getError());
-        assertEquals("Generic Error", response.getBody().getMessage());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Internal Server Error", response.getBody().getError());
+        assertEquals("An unexpected error occurred.", response.getBody().getMessage());
     }
 }

@@ -23,6 +23,8 @@ public class TransactionResponseDTO {
     private Integer dueDay;
     private Boolean isPaid;
     private CategoryResponseDTO category;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public TransactionResponseDTO(Transaction entity) {
         this.id = entity.getId();
@@ -33,5 +35,7 @@ public class TransactionResponseDTO {
         this.dueDay = entity.getDueDay();
         this.isPaid = entity.getIsPaid();
         this.category = new CategoryResponseDTO(entity.getCategory());
+        this.createdAt = entity.getCreatedAt();
+        this.updatedAt = entity.getUpdatedAt();
     }
 }
