@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,6 +21,8 @@ public class CategoryResponseDTO {
     private String description;
     private CategoryType categoryType;
     private BigDecimal spendingLimit;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public CategoryResponseDTO(Category entity) {
         this.id = entity.getId();
@@ -28,5 +31,7 @@ public class CategoryResponseDTO {
         this.description = entity.getDescription();
         this.categoryType = entity.getCategoryType();
         this.spendingLimit = entity.getSpendingLimit();
+        this.createdAt = entity.getCreatedAt();
+        this.updatedAt = entity.getUpdatedAt();
     }
 }

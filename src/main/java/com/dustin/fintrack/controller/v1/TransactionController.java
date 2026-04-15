@@ -3,12 +3,14 @@ package com.dustin.fintrack.controller.v1;
 import com.dustin.fintrack.dto.v1.request.TransactionRequestDTO;
 import com.dustin.fintrack.dto.v1.response.DashboardResponseDTO;
 import com.dustin.fintrack.dto.v1.response.TransactionResponseDTO;
+import com.dustin.fintrack.model.User;
 import com.dustin.fintrack.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -22,45 +24,41 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping
-    public ResponseEntity<TransactionResponseDTO> create(@Valid @RequestBody TransactionRequestDTO request) {
-        TransactionResponseDTO response = transactionService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<TransactionResponseDTO> create(
+            @Valid @RequestBody TransactionRequestDTO request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.create(request, user));
     }
 
     @GetMapping
-    public ResponseEntity<List<TransactionResponseDTO>> listAll() {
-        List<TransactionResponseDTO> transactions = transactionService.listAll();
-        return ResponseEntity.ok(transactions);
+    public ResponseEntity<List<TransactionResponseDTO>> listAll(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(transactionService.listAll(user));
     }
 
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardResponseDTO> getDashboard(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-
-        DashboardResponseDTO dashboardData = transactionService.getDashboardData(start, end);
-
-        return ResponseEntity.ok(dashboardData);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(transactionService.getDashboardData(start, end, user));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TransactionResponseDTO> findById(@PathVariable Long id) {
-        TransactionResponseDTO transaction = transactionService.findById(id);
-        return ResponseEntity.ok(transaction);
+    public ResponseEntity<TransactionResponseDTO> findById(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(transactionService.findById(id, user));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TransactionResponseDTO> update(
             @PathVariable Long id,
-            @Valid @RequestBody TransactionRequestDTO request) {
-        TransactionResponseDTO response = transactionService.update(id, request);
-
-        return ResponseEntity.ok(response);
+            @Valid @RequestBody TransactionRequestDTO request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(transactionService.update(id, request, user));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        transactionService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        transactionService.delete(id, user);
         return ResponseEntity.noContent().build();
     }
 }
