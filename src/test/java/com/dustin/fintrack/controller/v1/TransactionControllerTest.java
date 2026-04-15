@@ -5,16 +5,17 @@ import com.dustin.fintrack.dto.v1.request.TransactionRequestDTO;
 import com.dustin.fintrack.dto.v1.response.DashboardResponseDTO;
 import com.dustin.fintrack.dto.v1.response.TransactionResponseDTO;
 import com.dustin.fintrack.model.TransactionType;
+import com.dustin.fintrack.model.User;
 import com.dustin.fintrack.service.JwtService;
 import com.dustin.fintrack.service.TransactionService;
 import com.dustin.fintrack.service.UserDetailsServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,10 +27,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WithMockUser
 @WebMvcTest(TransactionController.class)
 public class TransactionControllerTest {
 
@@ -48,20 +49,30 @@ public class TransactionControllerTest {
     @MockitoBean
     private UserDetailsServiceImpl userDetailsService;
 
+    private User mockUser;
+
+    @BeforeEach
+    void setUp() {
+        mockUser = new User();
+        mockUser.setId(1L);
+        mockUser.setEmail("test@test.com");
+        mockUser.setName("Test User");
+        mockUser.setPassword("password");
+    }
+
     @Test
     @DisplayName("Should return 200 OK and list of transactions")
     void listAllSuccess() throws Exception {
-        // Arrange
         TransactionResponseDTO response = new TransactionResponseDTO();
         response.setId(1L);
         response.setDescription("Salary");
         response.setAmount(new BigDecimal("5000.0"));
         response.setType(TransactionType.INCOME);
 
-        when(transactionService.listAll()).thenReturn(List.of(response));
+        when(transactionService.listAll(any(User.class))).thenReturn(List.of(response));
 
-        // Act & Assert
         mockMvc.perform(get("/api/v1/transactions")
+                        .with(user(mockUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
@@ -72,7 +83,6 @@ public class TransactionControllerTest {
     @Test
     @DisplayName("Should return 201 Created when transaction is valid")
     void createSuccess() throws Exception {
-        // Arrange
         TransactionRequestDTO request = new TransactionRequestDTO();
         request.setDescription("Valid Transaction");
         request.setAmount(new BigDecimal("100.0"));
@@ -84,11 +94,11 @@ public class TransactionControllerTest {
         response.setId(1L);
         response.setDescription("Valid Transaction");
 
-        when(transactionService.create(any(TransactionRequestDTO.class))).thenReturn(response);
+        when(transactionService.create(any(TransactionRequestDTO.class), any(User.class))).thenReturn(response);
 
-        // Act & Assert
         mockMvc.perform(post("/api/v1/transactions")
                         .with(csrf())
+                        .with(user(mockUser))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -99,14 +109,13 @@ public class TransactionControllerTest {
     @Test
     @DisplayName("Should return 400 Bad Request when amount is negative")
     void createFailureInvalidData() throws Exception {
-        // Arrange
         TransactionRequestDTO request = new TransactionRequestDTO();
         request.setDescription("");
         request.setAmount(new BigDecimal("-10.0"));
 
-        // Act & Assert
         mockMvc.perform(post("/api/v1/transactions")
                         .with(csrf())
+                        .with(user(mockUser))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -115,18 +124,17 @@ public class TransactionControllerTest {
     @Test
     @DisplayName("Should return 200 OK and Dashboard data")
     void getDashboardSuccess() throws Exception {
-        // Arrange
         DashboardResponseDTO dashboardResponse = new DashboardResponseDTO();
         dashboardResponse.setTotalIncome(new BigDecimal("1000.0"));
         dashboardResponse.setTotalExpense(new BigDecimal("400.0"));
         dashboardResponse.setBalance(new BigDecimal("600.0"));
         dashboardResponse.setTransactions(List.of());
 
-        when(transactionService.getDashboardData(any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(transactionService.getDashboardData(any(LocalDateTime.class), any(LocalDateTime.class), any(User.class)))
                 .thenReturn(dashboardResponse);
 
-        // Act & Assert
         mockMvc.perform(get("/api/v1/transactions/dashboard")
+                        .with(user(mockUser))
                         .param("start", "2026-01-01T00:00:00")
                         .param("end", "2026-01-31T23:59:59")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -139,8 +147,8 @@ public class TransactionControllerTest {
     @Test
     @DisplayName("Should return 400 Bad Request when date parameters are missing")
     void getDashboardMissingParams() throws Exception {
-        // Act & Assert
         mockMvc.perform(get("/api/v1/transactions/dashboard")
+                        .with(user(mockUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -148,17 +156,16 @@ public class TransactionControllerTest {
     @Test
     @DisplayName("GET /api/v1/transactions/{id} should return 200 OK when transaction exists")
     void findByIdSuccess() throws Exception {
-        // Arrange
         TransactionResponseDTO response = new TransactionResponseDTO();
         response.setId(1L);
         response.setDescription("Shopping");
         response.setDueDay(10);
         response.setIsPaid(false);
 
-        when(transactionService.findById(1L)).thenReturn(response);
+        when(transactionService.findById(eq(1L), any(User.class))).thenReturn(response);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/transactions/{id}", 1L))
+        mockMvc.perform(get("/api/v1/transactions/{id}", 1L)
+                        .with(user(mockUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description").value("Shopping"))
                 .andExpect(jsonPath("$.dueDay").value(10));
@@ -167,19 +174,17 @@ public class TransactionControllerTest {
     @Test
     @DisplayName("GET /api/v1/transactions/{id} should return 404 when transaction does not exist")
     void findByIdNotFound() throws Exception {
-        // Arrange
-        when(transactionService.findById(99L))
+        when(transactionService.findById(eq(99L), any(User.class)))
                 .thenThrow(new ResourceNotFoundException("Transaction not found with id 99"));
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/transactions/{id}", 99L))
+        mockMvc.perform(get("/api/v1/transactions/{id}", 99L)
+                        .with(user(mockUser)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("PUT /api/v1/transactions/{id} should return 200 OK when transaction is updated")
     void updateSuccess() throws Exception {
-        // Arrange
         TransactionRequestDTO request = new TransactionRequestDTO();
         request.setDescription("Cinema Atualizado");
         request.setAmount(new BigDecimal("80.0"));
@@ -195,11 +200,11 @@ public class TransactionControllerTest {
         response.setDueDay(15);
         response.setIsPaid(true);
 
-        when(transactionService.update(eq(1L), any(TransactionRequestDTO.class))).thenReturn(response);
+        when(transactionService.update(eq(1L), any(TransactionRequestDTO.class), any(User.class))).thenReturn(response);
 
-        // Act & Assert
         mockMvc.perform(put("/api/v1/transactions/{id}", 1L)
                         .with(csrf())
+                        .with(user(mockUser))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -211,7 +216,6 @@ public class TransactionControllerTest {
     @Test
     @DisplayName("PUT /api/v1/transactions/{id} should return 404 when transaction does not exist")
     void updateNotFound() throws Exception {
-        // Arrange
         TransactionRequestDTO request = new TransactionRequestDTO();
         request.setDescription("Erro");
         request.setAmount(new BigDecimal("10.0"));
@@ -219,12 +223,12 @@ public class TransactionControllerTest {
         request.setType(TransactionType.EXPENSE);
         request.setCategoryId(1L);
 
-        when(transactionService.update(eq(99L), any(TransactionRequestDTO.class)))
+        when(transactionService.update(eq(99L), any(TransactionRequestDTO.class), any(User.class)))
                 .thenThrow(new ResourceNotFoundException("Transaction not found with id: 99"));
 
-        // Act & Assert
         mockMvc.perform(put("/api/v1/transactions/{id}", 99L)
                         .with(csrf())
+                        .with(user(mockUser))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -233,25 +237,23 @@ public class TransactionControllerTest {
     @Test
     @DisplayName("DELETE /api/v1/transactions/{id} should return 204 No Content")
     void deleteSuccess() throws Exception {
-        // Arrange
-        doNothing().when(transactionService).delete(1L);
+        doNothing().when(transactionService).delete(eq(1L), any(User.class));
 
-        // Act & Assert
         mockMvc.perform(delete("/api/v1/transactions/{id}", 1L)
-                        .with(csrf()))
+                        .with(csrf())
+                        .with(user(mockUser)))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("DELETE /api/v1/transactions/{id} should return 404 when transaction does not exist")
     void deleteNotFound() throws Exception {
-        // Arrange
         doThrow(new ResourceNotFoundException("Transaction not found with id: 99"))
-                .when(transactionService).delete(99L);
+                .when(transactionService).delete(eq(99L), any(User.class));
 
-        // Act & Assert
         mockMvc.perform(delete("/api/v1/transactions/{id}", 99L)
-                        .with(csrf()))
+                        .with(csrf())
+                        .with(user(mockUser)))
                 .andExpect(status().isNotFound());
     }
 }
