@@ -4,6 +4,7 @@ import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
 import com.dustin.fintrack.dto.v1.request.CategoryRequestDTO;
 import com.dustin.fintrack.dto.v1.response.CategoryResponseDTO;
 import com.dustin.fintrack.model.Category;
+import com.dustin.fintrack.model.User;
 import com.dustin.fintrack.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,14 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    public CategoryResponseDTO create(CategoryRequestDTO request) {
+    public CategoryResponseDTO create(CategoryRequestDTO request, User user) {
         Category category = new Category();
         category.setName(request.getName());
         category.setColor(request.getColor());
         category.setDescription(request.getDescription());
         category.setCategoryType(request.getCategoryType());
         category.setSpendingLimit(request.getSpendingLimit());
+        category.setUser(user);
 
         Category savedCategory = categoryRepository.save(category);
 
@@ -33,15 +35,16 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryResponseDTO> listAll() {
-        return categoryRepository.findAll()
+    public List<CategoryResponseDTO> listAll(User user) {
+        return categoryRepository.findAllByUser(user)
                 .stream()
                 .map(CategoryResponseDTO::new)
                 .toList();
     }
 
-    public CategoryResponseDTO update(Long id, CategoryRequestDTO dto) {
-        Category existingCategory = categoryRepository.findById(id)
+    @Transactional
+    public CategoryResponseDTO update(Long id, CategoryRequestDTO dto, User user) {
+        Category existingCategory = categoryRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
         Optional.ofNullable(dto.getName()).ifPresent(existingCategory::setName);
@@ -53,16 +56,17 @@ public class CategoryService {
         return new CategoryResponseDTO(categoryRepository.save(existingCategory));
     }
 
-    public void delete(Long id) {
-        Category existingCategory = categoryRepository.findById(id)
+    @Transactional
+    public void delete(Long id, User user) {
+        Category existingCategory = categoryRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
         categoryRepository.deleteById(existingCategory.getId());
     }
 
     @Transactional(readOnly = true)
-    public CategoryResponseDTO findById(Long id) {
-        Category category = categoryRepository.findById(id)
+    public CategoryResponseDTO findById(Long id, User user) {
+        Category category = categoryRepository.findByIdAndUser(id, user)
             .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
         return new CategoryResponseDTO(category);
