@@ -1,5 +1,6 @@
 package com.dustin.fintrack.controller.v1;
 
+import com.dustin.fintrack.dto.v1.request.TransactionFilterDTO;
 import com.dustin.fintrack.dto.v1.request.TransactionRequestDTO;
 import com.dustin.fintrack.dto.v1.response.DashboardResponseDTO;
 import com.dustin.fintrack.dto.v1.response.TransactionResponseDTO;
@@ -7,6 +8,10 @@ import com.dustin.fintrack.model.User;
 import com.dustin.fintrack.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +19,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -31,8 +35,11 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TransactionResponseDTO>> listAll(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(transactionService.listAll(user));
+    public ResponseEntity<Page<TransactionResponseDTO>> listAll(
+            TransactionFilterDTO filter,
+            @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(transactionService.listAllPaged(filter, pageable, user));
     }
 
     @GetMapping("/dashboard")

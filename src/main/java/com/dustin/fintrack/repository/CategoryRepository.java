@@ -13,5 +13,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     List<Category> findAllByUser(User user);
 
+    List<Category> findAllByUserAndNameContainingIgnoreCase(User user, String name);
+
     Optional<Category> findByIdAndUser(Long id, User user);
 }

@@ -35,11 +35,12 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryResponseDTO> listAll(User user) {
-        return categoryRepository.findAllByUser(user)
-                .stream()
-                .map(CategoryResponseDTO::new)
-                .toList();
+    public List<CategoryResponseDTO> listAll(User user, String name) {
+        List<Category> categories = (name != null && !name.isBlank())
+                ? categoryRepository.findAllByUserAndNameContainingIgnoreCase(user, name)
+                : categoryRepository.findAllByUser(user);
+
+        return categories.stream().map(CategoryResponseDTO::new).toList();
     }
 
     @Transactional

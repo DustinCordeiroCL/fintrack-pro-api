@@ -79,11 +79,24 @@ public class CategoryServiceTest {
     void shouldListAllCategories() {
         when(categoryRepository.findAllByUser(user)).thenReturn(List.of(category));
 
-        List<CategoryResponseDTO> result = categoryService.listAll(user);
+        List<CategoryResponseDTO> result = categoryService.listAll(user, null);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
         assertEquals("Electronics", result.get(0).getName());
+    }
+
+    @Test
+    @DisplayName("Should filter categories by name")
+    void shouldFilterCategoriesByName() {
+        when(categoryRepository.findAllByUserAndNameContainingIgnoreCase(user, "Elec")).thenReturn(List.of(category));
+
+        List<CategoryResponseDTO> result = categoryService.listAll(user, "Elec");
+
+        assertEquals(1, result.size());
+        assertEquals("Electronics", result.get(0).getName());
+        verify(categoryRepository, times(1)).findAllByUserAndNameContainingIgnoreCase(user, "Elec");
+        verify(categoryRepository, never()).findAllByUser(any());
     }
 
     @Test

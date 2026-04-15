@@ -1,18 +1,24 @@
 package com.dustin.fintrack.service;
 
 import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
+import com.dustin.fintrack.dto.v1.request.TransactionFilterDTO;
 import com.dustin.fintrack.dto.v1.request.TransactionRequestDTO;
 import com.dustin.fintrack.model.Category;
 import com.dustin.fintrack.model.Transaction;
 import com.dustin.fintrack.model.User;
 import com.dustin.fintrack.repository.TransactionRepository;
 import com.dustin.fintrack.repository.CategoryRepository;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.dustin.fintrack.dto.v1.response.DashboardResponseDTO;
 import com.dustin.fintrack.model.TransactionType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,6 +58,37 @@ public class TransactionService {
                 .stream()
                 .map(TransactionResponseDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TransactionResponseDTO> listAllPaged(TransactionFilterDTO filter, Pageable pageable, User user) {
+        Specification<Transaction> spec = buildSpecification(filter, user);
+        return transactionRepository.findAll(spec, pageable).map(TransactionResponseDTO::new);
+    }
+
+    private Specification<Transaction> buildSpecification(TransactionFilterDTO filter, User user) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("user"), user));
+
+            if (filter.getType() != null) {
+                predicates.add(cb.equal(root.get("type"), filter.getType()));
+            }
+            if (filter.getCategoryId() != null) {
+                predicates.add(cb.equal(root.get("category").get("id"), filter.getCategoryId()));
+            }
+            if (filter.getIsPaid() != null) {
+                predicates.add(cb.equal(root.get("isPaid"), filter.getIsPaid()));
+            }
+            if (filter.getStartDate() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), filter.getStartDate()));
+            }
+            if (filter.getEndDate() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), filter.getEndDate()));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     @Transactional(readOnly = true)

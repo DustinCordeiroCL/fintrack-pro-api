@@ -28,8 +28,10 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponseDTO>> listAll(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(categoryService.listAll(user));
+    public ResponseEntity<List<CategoryResponseDTO>> listAll(
+            @RequestParam(required = false) String name,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(categoryService.listAll(user, name));
     }
 
     @PutMapping("/{id}")
