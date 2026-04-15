@@ -99,10 +99,10 @@ The API uses **stateless JWT authentication**. All endpoints except `/api/v1/aut
 - [x] **Issue #15:** Data isolation — Category and Transaction linked to authenticated User.
 
 ### 🔧 V3 — Resilience & Observability
-- [ ] **Issue #16:** Database Migrations with Flyway.
-- [ ] **Issue #17:** Input Validation Hardening.
-- [ ] **Issue #18:** Data Audit (Created/Updated Timestamps).
-- [ ] **Issue #19:** Structured Logging (JSON / GCP & AWS Ready).
+- [x] **Issue #16:** Database Migrations with Flyway.
+- [x] **Issue #17:** Input Validation Hardening.
+- [x] **Issue #18:** Data Audit (Created/Updated Timestamps).
+- [x] **Issue #19:** Structured Logging (JSON / GCP & AWS Ready).
 - [ ] **Issue #20:** Pagination & Filtering on List Endpoints.
 - [ ] **Issue #21:** Dashboard Enrichment (Per-Category Analytics).
 
