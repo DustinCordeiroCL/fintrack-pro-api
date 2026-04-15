@@ -23,6 +23,10 @@ The project follows the **Controller-Service-Repository** pattern to ensure sepa
 * **Config:** Security filter chain, JWT filter, and authentication provider setup.
 * **Handlers:** Global Exception Handling for standardized API error responses.
 
+## 🔒 Data Isolation (Multi-Tenancy per User)
+
+All resources are scoped to the authenticated user. `Category` and `Transaction` entities carry a `user_id` FK. Every repository query filters by the authenticated principal — users can only read and modify their own data. Attempting to access a resource owned by another user returns `404` to avoid leaking resource existence.
+
 ## 🐳 Getting Started (Docker)
 
 To run the database and the management tools (PgAdmin) locally:
@@ -92,7 +96,7 @@ The API uses **stateless JWT authentication**. All endpoints except `/api/v1/aut
 
 ### 🔒 V2 — Security & Multi-Tenancy
 - [x] **Issue #14:** User entity + Spring Security + JWT Authentication + Refresh Token.
-- [ ] **Issue #15:** Data isolation — Category and Transaction linked to authenticated User.
+- [x] **Issue #15:** Data isolation — Category and Transaction linked to authenticated User.
 
 ### 🔧 V3 — Resilience & Observability
 - [ ] **Issue #16:** Database Migrations with Flyway.

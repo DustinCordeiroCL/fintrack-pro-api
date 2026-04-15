@@ -1,12 +1,13 @@
 package com.dustin.fintrack.controller.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,15 +19,18 @@ import java.util.Map;
 @ControllerAdvice
 public class ResourceExceptionHandler {
 
-    // Catching RuntimeException for now as a generic handler
+    private static final Logger log = LoggerFactory.getLogger(ResourceExceptionHandler.class);
+
+    // Last-resort handler — logs internally, never exposes details to the client (OWASP A05)
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<StandardError> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+        log.error("Unexpected error at {}: {}", request.getRequestURI(), e.getMessage(), e);
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         StandardError err = new StandardError();
         err.setTimestamp(Instant.now());
         err.setStatus(status.value());
-        err.setError("Business Logic Error");
-        err.setMessage(e.getMessage());
+        err.setError("Internal Server Error");
+        err.setMessage("An unexpected error occurred.");
         err.setPath(request.getRequestURI());
 
         return ResponseEntity.status(status).body(err);
