@@ -153,6 +153,10 @@ public class TransactionServiceTest {
         assertEquals(0, new BigDecimal("40.0").compareTo(result.getTotalExpense()));
         assertEquals(0, new BigDecimal("60.0").compareTo(result.getBalance()));
         assertEquals(2, result.getTransactions().size());
+        assertEquals(1, result.getExpensesByCategory().size());
+        assertEquals(1, result.getIncomeByCategory().size());
+        assertEquals("Lazer", result.getExpensesByCategory().get(0).getCategoryName());
+        assertEquals(0, new BigDecimal("100.00").compareTo(result.getIncomeByCategory().get(0).getPercentageOfTotal()));
     }
 
     @Test
@@ -166,6 +170,8 @@ public class TransactionServiceTest {
         assertEquals(BigDecimal.ZERO, result.getTotalExpense());
         assertEquals(BigDecimal.ZERO, result.getBalance());
         assertTrue(result.getTransactions().isEmpty());
+        assertTrue(result.getExpensesByCategory().isEmpty());
+        assertTrue(result.getIncomeByCategory().isEmpty());
     }
 
     @Test

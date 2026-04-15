@@ -153,6 +153,8 @@ public class TransactionControllerTest {
         dashboardResponse.setTotalExpense(new BigDecimal("400.0"));
         dashboardResponse.setBalance(new BigDecimal("600.0"));
         dashboardResponse.setTransactions(List.of());
+        dashboardResponse.setExpensesByCategory(List.of());
+        dashboardResponse.setIncomeByCategory(List.of());
 
         when(transactionService.getDashboardData(any(LocalDateTime.class), any(LocalDateTime.class), any(User.class)))
                 .thenReturn(dashboardResponse);

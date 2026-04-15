@@ -104,7 +104,7 @@ The API uses **stateless JWT authentication**. All endpoints except `/api/v1/aut
 - [x] **Issue #18:** Data Audit (Created/Updated Timestamps).
 - [x] **Issue #19:** Structured Logging (JSON / GCP & AWS Ready).
 - [x] **Issue #20:** Pagination & Filtering on List Endpoints.
-- [ ] **Issue #21:** Dashboard Enrichment (Per-Category Analytics).
+- [x] **Issue #21:** Dashboard Enrichment (Per-Category Analytics).
 
 ### 🚀 V4 — Deploy
 - [ ] **Issue #22:** Production Deploy on Railway.
