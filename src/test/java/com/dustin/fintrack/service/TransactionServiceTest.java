@@ -1,6 +1,7 @@
 package com.dustin.fintrack.service;
 
 import com.dustin.fintrack.controller.exception.ResourceNotFoundException;
+import com.dustin.fintrack.dto.v1.request.TransactionFilterDTO;
 import com.dustin.fintrack.dto.v1.request.TransactionRequestDTO;
 import com.dustin.fintrack.dto.v1.response.TransactionResponseDTO;
 import com.dustin.fintrack.dto.v1.response.DashboardResponseDTO;
@@ -17,6 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -239,5 +245,37 @@ public class TransactionServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> transactionService.delete(99L, user));
         verify(transactionRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("Should return paginated list with no filters applied")
+    void listAllPagedNoFilter() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Transaction> page = new PageImpl<>(List.of(transaction), pageable, 1);
+
+        when(transactionRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        Page<TransactionResponseDTO> result = transactionService.listAllPaged(new TransactionFilterDTO(), pageable, user);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Cinema", result.getContent().get(0).getDescription());
+        verify(transactionRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("Should return empty page when no transactions match filter")
+    void listAllPagedEmptyResult() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Transaction> emptyPage = Page.empty(pageable);
+
+        when(transactionRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(emptyPage);
+
+        TransactionFilterDTO filter = new TransactionFilterDTO();
+        filter.setType(TransactionType.INCOME);
+        Page<TransactionResponseDTO> result = transactionService.listAllPaged(filter, pageable, user);
+
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalElements());
     }
 }

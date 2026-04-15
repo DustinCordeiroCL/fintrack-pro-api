@@ -19,6 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,7 +64,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 200 OK and list of transactions")
+    @DisplayName("Should return 200 OK and paginated list of transactions")
     void listAllSuccess() throws Exception {
         TransactionResponseDTO response = new TransactionResponseDTO();
         response.setId(1L);
@@ -69,15 +72,36 @@ public class TransactionControllerTest {
         response.setAmount(new BigDecimal("5000.0"));
         response.setType(TransactionType.INCOME);
 
-        when(transactionService.listAll(any(User.class))).thenReturn(List.of(response));
+        Page<TransactionResponseDTO> page = new PageImpl<>(List.of(response));
+        when(transactionService.listAllPaged(any(), any(), any(User.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/transactions")
                         .with(user(mockUser))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$[0].description").value("Salary"))
-                .andExpect(jsonPath("$[0].amount").value(5000.0));
+                .andExpect(jsonPath("$.content.size()").value(1))
+                .andExpect(jsonPath("$.content[0].description").value("Salary"))
+                .andExpect(jsonPath("$.content[0].amount").value(5000.0))
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    @DisplayName("Should return 200 OK filtering by type EXPENSE")
+    void listAllWithTypeFilter() throws Exception {
+        TransactionResponseDTO response = new TransactionResponseDTO();
+        response.setId(2L);
+        response.setDescription("Market");
+        response.setType(TransactionType.EXPENSE);
+
+        Page<TransactionResponseDTO> page = new PageImpl<>(List.of(response));
+        when(transactionService.listAllPaged(any(), any(), any(User.class))).thenReturn(page);
+
+        mockMvc.perform(get("/api/v1/transactions")
+                        .with(user(mockUser))
+                        .param("type", "EXPENSE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()").value(1))
+                .andExpect(jsonPath("$.content[0].description").value("Market"));
     }
 
     @Test

@@ -71,7 +71,7 @@ class CategoryControllerTest {
         request.setCategoryType(CategoryType.ESSENTIAL);
         request.setSpendingLimit(new BigDecimal("300000"));
 
-        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"));
+        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"), null, null);
 
         when(categoryService.create(any(CategoryRequestDTO.class), any(User.class))).thenReturn(response);
 
@@ -88,10 +88,24 @@ class CategoryControllerTest {
     @Test
     @DisplayName("GET /api/v1/categories should return 200 OK with list")
     void listAllShouldReturn200() throws Exception {
-        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"));
-        when(categoryService.listAll(any(User.class))).thenReturn(List.of(response));
+        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"), null, null);
+        when(categoryService.listAll(any(User.class), any())).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/v1/categories")
+                        .with(user(mockUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1))
+                .andExpect(jsonPath("$[0].name").value("Electronics"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/categories?name=Elec should return 200 OK filtered")
+    void listAllWithNameFilterShouldReturn200() throws Exception {
+        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"), null, null);
+        when(categoryService.listAll(any(User.class), eq("Elec"))).thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/v1/categories")
+                        .param("name", "Elec")
                         .with(user(mockUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
@@ -107,7 +121,7 @@ class CategoryControllerTest {
         request.setCategoryType(CategoryType.DISCRETIONARY);
         request.setSpendingLimit(new BigDecimal("300000"));
 
-        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Lazer", "#000", null, CategoryType.DISCRETIONARY, new BigDecimal("300000"));
+        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Lazer", "#000", null, CategoryType.DISCRETIONARY, new BigDecimal("300000"), null, null);
         when(categoryService.update(eq(1L), any(CategoryRequestDTO.class), any(User.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/v1/categories/{id}", 1L)
@@ -163,7 +177,7 @@ class CategoryControllerTest {
     @Test
     @DisplayName("GET /api/v1/categories/{id} should return 200 OK when category exists")
     void findByIdShouldReturn200() throws Exception {
-        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"));
+        CategoryResponseDTO response = new CategoryResponseDTO(1L, "Electronics", "#000000", null, CategoryType.ESSENTIAL, new BigDecimal("300000"), null, null);
         when(categoryService.findById(eq(1L), any(User.class))).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/categories/{id}", 1L)
