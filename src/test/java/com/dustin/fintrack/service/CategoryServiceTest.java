@@ -5,6 +5,7 @@ import com.dustin.fintrack.dto.v1.request.CategoryRequestDTO;
 import com.dustin.fintrack.dto.v1.response.CategoryResponseDTO;
 import com.dustin.fintrack.model.Category;
 import com.dustin.fintrack.model.CategoryType;
+import com.dustin.fintrack.model.User;
 import com.dustin.fintrack.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,9 +34,14 @@ public class CategoryServiceTest {
 
     private Category category;
     private CategoryRequestDTO request;
+    private User user;
 
     @BeforeEach
     void setUp() {
+        user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+
         category = new Category();
         category.setId(1L);
         category.setName("Electronics");
@@ -43,6 +49,7 @@ public class CategoryServiceTest {
         category.setDescription("Unity tests");
         category.setCategoryType(CategoryType.ESSENTIAL);
         category.setSpendingLimit(new BigDecimal("300000"));
+        category.setUser(user);
 
         request = new CategoryRequestDTO();
         request.setName("Electronics");
@@ -57,7 +64,7 @@ public class CategoryServiceTest {
     void shouldSaveCategory() {
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
-        CategoryResponseDTO result = categoryService.create(request);
+        CategoryResponseDTO result = categoryService.create(request, user);
 
         assertNotNull(result);
         assertEquals("Electronics", result.getName());
@@ -67,9 +74,9 @@ public class CategoryServiceTest {
     @Test
     @DisplayName("Should list all categories as ResponseDTOs")
     void shouldListAllCategories() {
-        when(categoryRepository.findAll()).thenReturn(List.of(category));
+        when(categoryRepository.findAllByUser(user)).thenReturn(List.of(category));
 
-        List<CategoryResponseDTO> result = categoryService.listAll();
+        List<CategoryResponseDTO> result = categoryService.listAll(user);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
@@ -86,10 +93,10 @@ public class CategoryServiceTest {
         requestToUpdate.setCategoryType(CategoryType.DISCRETIONARY);
         requestToUpdate.setSpendingLimit(new BigDecimal("500000"));
 
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(category));
         when(categoryRepository.save(any(Category.class))).thenAnswer(i -> i.getArgument(0));
 
-        CategoryResponseDTO result = categoryService.update(1L, requestToUpdate);
+        CategoryResponseDTO result = categoryService.update(1L, requestToUpdate, user);
 
         assertNotNull(result);
         assertEquals("Novo Nome", result.getName());
@@ -103,36 +110,36 @@ public class CategoryServiceTest {
     @Test
     @DisplayName("Should throw ResourceNotFoundException when updating non-existent ID")
     void updateShouldThrowExceptionWhenIdDoesNotExist() {
-        when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
+        when(categoryRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.update(99L, request));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.update(99L, request, user));
         verify(categoryRepository, never()).save(any(Category.class));
     }
 
     @Test
     @DisplayName("Should delete category when ID exists")
     void deleteShouldSucceedWhenIdExists() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(category));
 
-        assertDoesNotThrow(() -> categoryService.delete(1L));
+        assertDoesNotThrow(() -> categoryService.delete(1L, user));
         verify(categoryRepository, times(1)).deleteById(1L);
     }
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when deleting non-existent ID")
     void deleteShouldThrowExceptionWhenIdDoesNotExist() {
-        when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
+        when(categoryRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.delete(99L));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.delete(99L, user));
         verify(categoryRepository, never()).deleteById(any());
     }
 
     @Test
     @DisplayName("Should return CategoryResponseDTO when ID exists")
     void findByIdShouldReturnDtoWhenIdExists() {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(category));
 
-        CategoryResponseDTO result = categoryService.findById(1L);
+        CategoryResponseDTO result = categoryService.findById(1L, user);
 
         assertNotNull(result);
         assertEquals("Electronics", result.getName());
@@ -140,16 +147,16 @@ public class CategoryServiceTest {
         assertEquals("Unity tests DTO", result.getDescription());
         assertEquals(CategoryType.ESSENTIAL, result.getCategoryType());
         assertEquals(new BigDecimal("300000"), result.getSpendingLimit());
-        verify(categoryRepository, times(1)).findById(1L);
+        verify(categoryRepository, times(1)).findByIdAndUser(1L, user);
     }
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when ID does not exist")
     void findByIdShouldThrowExceptionWhenIdDoesNotExist() {
-        when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
+        when(categoryRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> categoryService.findById(99L));
-        verify(categoryRepository, times(1)).findById(99L);
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.findById(99L, user));
+        verify(categoryRepository, times(1)).findByIdAndUser(99L, user);
     }
 
     @Test
@@ -157,7 +164,7 @@ public class CategoryServiceTest {
     void shouldPersistNewCategoryFields() {
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
-        CategoryResponseDTO result = categoryService.create(request);
+        CategoryResponseDTO result = categoryService.create(request, user);
 
         assertEquals(CategoryType.ESSENTIAL, result.getCategoryType());
         assertEquals(new BigDecimal("300000"), result.getSpendingLimit());
