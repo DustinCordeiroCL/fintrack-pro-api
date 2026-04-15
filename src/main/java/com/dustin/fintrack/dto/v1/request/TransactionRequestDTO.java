@@ -1,6 +1,8 @@
 package com.dustin.fintrack.dto.v1.request;
 
 import com.dustin.fintrack.model.TransactionType;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -32,6 +34,9 @@ public class TransactionRequestDTO {
         @NotNull(message = "Category ID is required")
         private Long categoryId;
 
+        @Min(value = 1, message = "Due day must be between 1 and 31")
+        @Max(value = 31, message = "Due day must be between 1 and 31")
         private Integer dueDay;
+
         private Boolean isPaid;
 }

@@ -4,6 +4,7 @@ import com.dustin.fintrack.dto.v1.request.CategoryRequestDTO;
 import com.dustin.fintrack.dto.v1.response.CategoryResponseDTO;
 import com.dustin.fintrack.model.User;
 import com.dustin.fintrack.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<CategoryResponseDTO> create(
-            @RequestBody CategoryRequestDTO category,
+            @Valid @RequestBody CategoryRequestDTO category,
             @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(categoryService.create(category, user), HttpStatus.CREATED);
     }
@@ -34,7 +35,7 @@ public class CategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> update(
             @PathVariable Long id,
-            @RequestBody CategoryRequestDTO dto,
+            @Valid @RequestBody CategoryRequestDTO dto,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(categoryService.update(id, dto, user));
     }

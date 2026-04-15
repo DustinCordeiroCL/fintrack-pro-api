@@ -183,4 +183,53 @@ class CategoryControllerTest {
                         .with(user(mockUser)))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("POST /api/v1/categories should return 400 when categoryType is missing")
+    void createShouldReturn400WhenCategoryTypeMissing() throws Exception {
+        CategoryRequestDTO request = new CategoryRequestDTO();
+        request.setName("Valid Name");
+
+        mockMvc.perform(post("/api/v1/categories")
+                        .with(csrf())
+                        .with(user(mockUser))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.categoryType").value("Category type is required"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/categories should return 400 when spendingLimit is negative")
+    void createShouldReturn400WhenSpendingLimitNegative() throws Exception {
+        CategoryRequestDTO request = new CategoryRequestDTO();
+        request.setName("Valid Name");
+        request.setCategoryType(CategoryType.ESSENTIAL);
+        request.setSpendingLimit(new BigDecimal("-100"));
+
+        mockMvc.perform(post("/api/v1/categories")
+                        .with(csrf())
+                        .with(user(mockUser))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.spendingLimit").value("Spending limit must be zero or positive"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/categories should return 400 when color format is invalid")
+    void createShouldReturn400WhenColorInvalid() throws Exception {
+        CategoryRequestDTO request = new CategoryRequestDTO();
+        request.setName("Valid Name");
+        request.setCategoryType(CategoryType.ESSENTIAL);
+        request.setColor("red");
+
+        mockMvc.perform(post("/api/v1/categories")
+                        .with(csrf())
+                        .with(user(mockUser))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.color").value("Color must be a valid hex color (e.g. #FF5733)"));
+    }
 }
