@@ -15,11 +15,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.dustin.fintrack.dto.v1.response.CategorySummaryDTO;
 import com.dustin.fintrack.dto.v1.response.DashboardResponseDTO;
 import com.dustin.fintrack.model.TransactionType;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
@@ -111,7 +115,38 @@ public class TransactionService {
                 .map(TransactionResponseDTO::new)
                 .collect(Collectors.toList());
 
-        return new DashboardResponseDTO(totalIncome, totalExpense, balance, transactionDTOs);
+        List<CategorySummaryDTO> expensesByCategory = buildCategorySummaries(
+                transactions, TransactionType.EXPENSE, totalExpense);
+
+        List<CategorySummaryDTO> incomeByCategory = buildCategorySummaries(
+                transactions, TransactionType.INCOME, totalIncome);
+
+        return new DashboardResponseDTO(totalIncome, totalExpense, balance, transactionDTOs,
+                expensesByCategory, incomeByCategory);
+    }
+
+    private List<CategorySummaryDTO> buildCategorySummaries(
+            List<Transaction> transactions, TransactionType type, BigDecimal total) {
+
+        Map<Long, List<Transaction>> grouped = transactions.stream()
+                .filter(t -> t.getType() == type)
+                .collect(Collectors.groupingBy(t -> t.getCategory().getId()));
+
+        return grouped.entrySet().stream().map(entry -> {
+            List<Transaction> group = entry.getValue();
+            String categoryName = group.get(0).getCategory().getName();
+            BigDecimal groupTotal = group.stream()
+                    .map(Transaction::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            long count = group.size();
+            BigDecimal percentage = total.compareTo(BigDecimal.ZERO) == 0
+                    ? BigDecimal.ZERO
+                    : groupTotal.multiply(new BigDecimal("100"))
+                            .divide(total, 2, RoundingMode.HALF_UP);
+
+            return new CategorySummaryDTO(entry.getKey(), categoryName, groupTotal, count, percentage);
+        }).sorted(Comparator.comparing(CategorySummaryDTO::getTotalAmount).reversed())
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

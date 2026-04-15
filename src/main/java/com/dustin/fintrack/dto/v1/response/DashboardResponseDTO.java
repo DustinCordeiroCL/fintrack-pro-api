@@ -16,4 +16,6 @@ public class DashboardResponseDTO {
     private BigDecimal balance;
 
     private List<TransactionResponseDTO> transactions;
+    private List<CategorySummaryDTO> expensesByCategory;
+    private List<CategorySummaryDTO> incomeByCategory;
 }
