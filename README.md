@@ -107,7 +107,7 @@ SPRING_PROFILES_ACTIVE  prod
 ## Changelog
 
 ### V4 — Deploy
-- [ ] **#22** Production deploy on Fly.io + Supabase
+- [x] **#22** Production deploy on Fly.io + Supabase
 
 ### V3 — Resilience & Observability
 - [x] **#21** Dashboard enrichment with per-category analytics
